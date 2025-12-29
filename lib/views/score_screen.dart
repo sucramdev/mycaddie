@@ -1,38 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../viewmodels/hole_viewmodel.dart';
 
-class ScoreScreen extends StatefulWidget {
+class ScoreScreen extends StatelessWidget {
   const ScoreScreen({super.key});
 
   @override
-  State<ScoreScreen> createState() => _ScoreScreenState();
-}
-
-class _ScoreScreenState extends State<ScoreScreen> {
-  int strokes = 0;
-
-  @override
   Widget build(BuildContext context) {
+    final vm = context.read<HoleViewModel>();
+
     return Scaffold(
       appBar: AppBar(title: const Text("Score")),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text("Strokes: $strokes", style: const TextStyle(fontSize: 26)),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.remove),
-                onPressed: () => setState(() => strokes--),
-              ),
-              IconButton(
-                icon: const Icon(Icons.add),
-                onPressed: () => setState(() => strokes++),
-              ),
-            ],
-          )
-        ],
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text("Hål avslutat", style: TextStyle(fontSize: 22)),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              child: const Text("Nästa hål"),
+              onPressed: () {
+                vm.resetHole();
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

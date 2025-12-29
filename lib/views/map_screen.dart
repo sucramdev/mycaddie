@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/map_vm.dart';
+import '../viewmodels/hole_viewmodel.dart';
+import '../widgets/info_card.dart';
+import 'score_screen.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -14,51 +16,14 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<MapViewModel>().startTracking();
-    });
-  }
-
-  @override
-  void dispose() {
-    context.read<MapViewModel>().stopTracking();
-    super.dispose();
+    Future.microtask(
+          () => context.read<HoleViewModel>().startTracking(),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<MapViewModel>();
-
-    final markers = <Marker>{
-      // 🔵 DU
-      if (vm.position != null)
-        Marker(
-          markerId: const MarkerId("me"),
-          position: LatLng(
-            vm.position!.latitude,
-            vm.position!.longitude,
-          ),
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueAzure,
-          ),
-        ),
-
-      // 🟢 GREEN
-      Marker(
-        markerId: const MarkerId("green"),
-        position: vm.currentHole.green,
-        icon: BitmapDescriptor.defaultMarkerWithHue(
-          BitmapDescriptor.hueGreen,
-        ),
-      ),
-
-      // 🎯 AIM
-      if (vm.aimPoint != null)
-        Marker(
-          markerId: const MarkerId("aim"),
-          position: vm.aimPoint!,
-        ),
-    };
+    final vm = context.watch<HoleViewModel>();
 
     return Scaffold(
       appBar: AppBar(title: const Text("Hole map")),
@@ -66,35 +31,56 @@ class _MapScreenState extends State<MapScreen> {
         children: [
           GoogleMap(
             mapType: MapType.satellite,
+            myLocationEnabled: true,
+            onMapCreated: vm.onMapCreated,
             initialCameraPosition: const CameraPosition(
-              target: LatLng(59.3293, 18.0686), // fallback
+              target: LatLng(0, 0),
               zoom: 17,
             ),
-            myLocationEnabled: false, // vi hanterar själva
-            onMapCreated: vm.onMapCreated,
-            onTap: vm.setAim,
-            markers: markers,
+            onTap: vm.setGreen,
+            markers: {
+              if (vm.hole.tee != null)
+                Marker(
+                  markerId: const MarkerId("tee"),
+                  position: vm.hole.tee!,
+                  icon: BitmapDescriptor.defaultMarkerWithHue(
+                    BitmapDescriptor.hueBlue,
+                  ),
+                ),
+              if (vm.hole.green != null)
+                Marker(
+                  markerId: const MarkerId("green"),
+                  position: vm.hole.green!,
+                  icon: BitmapDescriptor.defaultMarkerWithHue(
+                    BitmapDescriptor.hueGreen,
+                  ),
+                ),
+            },
           ),
 
-          Positioned(
-            bottom: 20,
-            left: 20,
-            right: 20,
-            child: Card(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text("${vm.distanceToGreen().round()} m till green"),
-                    Text("Vind: ${vm.windSpeed} m/s"),
-                    Text("Rekommenderad klubba: ${vm.recommendedClub().name}"),
-                  ],
-                ),
-              ),
-            ),
+          /// INFO
+          const Positioned(
+            bottom: 90,
+            left: 16,
+            right: 16,
+            child: InfoCard(),
           ),
         ],
+      ),
+
+      floatingActionButton: FloatingActionButton.extended(
+        icon: const Icon(Icons.flag),
+        label: Text(vm.actionText),
+        onPressed: () {
+          if (vm.phase == HolePhase.waitingForTee) {
+            vm.setTee();
+          } else if (vm.phase == HolePhase.playing) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ScoreScreen()),
+            );
+          }
+        },
       ),
     );
   }

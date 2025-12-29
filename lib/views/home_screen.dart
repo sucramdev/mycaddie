@@ -10,12 +10,11 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(title: const Text("myCaddie")),
       body: Center(
         child: ElevatedButton(
-          child: const Text("Start round"),
+          child: const Text("Starta runda"),
           onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => const MapScreen(),
-              ),
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const MapScreen()),
             );
           },
         ),
