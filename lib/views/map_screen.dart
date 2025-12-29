@@ -14,12 +14,51 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<MapViewModel>().updatePosition();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<MapViewModel>().startTracking();
+    });
+  }
+
+  @override
+  void dispose() {
+    context.read<MapViewModel>().stopTracking();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final vm = context.watch<MapViewModel>();
+
+    final markers = <Marker>{
+      // 🔵 DU
+      if (vm.position != null)
+        Marker(
+          markerId: const MarkerId("me"),
+          position: LatLng(
+            vm.position!.latitude,
+            vm.position!.longitude,
+          ),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueAzure,
+          ),
+        ),
+
+      // 🟢 GREEN
+      Marker(
+        markerId: const MarkerId("green"),
+        position: vm.currentHole.green,
+        icon: BitmapDescriptor.defaultMarkerWithHue(
+          BitmapDescriptor.hueGreen,
+        ),
+      ),
+
+      // 🎯 AIM
+      if (vm.aimPoint != null)
+        Marker(
+          markerId: const MarkerId("aim"),
+          position: vm.aimPoint!,
+        ),
+    };
 
     return Scaffold(
       appBar: AppBar(title: const Text("Hole map")),
@@ -28,42 +67,33 @@ class _MapScreenState extends State<MapScreen> {
           GoogleMap(
             mapType: MapType.satellite,
             initialCameraPosition: const CameraPosition(
-              target: LatLng(59.3293, 18.0686),
+              target: LatLng(59.3293, 18.0686), // fallback
               zoom: 17,
             ),
-            myLocationEnabled: true,
+            myLocationEnabled: false, // vi hanterar själva
+            onMapCreated: vm.onMapCreated,
             onTap: vm.setAim,
-            markers: {
-              if (vm.aimPoint != null)
-                Marker(
-                  markerId: const MarkerId("aim"),
-                  position: vm.aimPoint!,
-                ),
-            },
+            markers: markers,
           ),
-          if (vm.distanceToAim() != null)
-            Positioned(
-              bottom: 20,
-              left: 20,
-              right: 20,
-              child: Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    children: [
-                      Text(
-                        "${vm.distanceToAim()!.round()} m till mål",
-                        style: const TextStyle(fontSize: 18),
-                      ),
-                      if (vm.recommendedClub() != null)
-                        Text(
-                          "Rekommenderad klubba: ${vm.recommendedClub()!.name}",
-                        ),
-                    ],
-                  ),
+
+          Positioned(
+            bottom: 20,
+            left: 20,
+            right: 20,
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text("${vm.distanceToGreen().round()} m till green"),
+                    Text("Vind: ${vm.windSpeed} m/s"),
+                    Text("Rekommenderad klubba: ${vm.recommendedClub().name}"),
+                  ],
                 ),
               ),
             ),
+          ),
         ],
       ),
     );

@@ -5,10 +5,8 @@ import 'views/home_screen.dart';
 
 void main() {
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => MapViewModel()),
-      ],
+    ChangeNotifierProvider(
+      create: (_) => MapViewModel(),
       child: const MyCaddieApp(),
     ),
   );
@@ -20,6 +18,7 @@ class MyCaddieApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'myCaddie',
       theme: ThemeData.dark(),
       home: const HomeScreen(),

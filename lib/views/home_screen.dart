@@ -12,9 +12,10 @@ class HomeScreen extends StatelessWidget {
         child: ElevatedButton(
           child: const Text("Start round"),
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const MapScreen()),
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const MapScreen(),
+              ),
             );
           },
         ),
