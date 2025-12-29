@@ -4,5 +4,5 @@ class Hole {
   LatLng? tee;
   LatLng? green;
 
-  Hole({this.tee, this.green});
+  Hole();
 }

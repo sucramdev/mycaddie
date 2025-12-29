@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/hole_viewmodel.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import '../viewmodels/map_viewmodel.dart';
 import '../widgets/info_card.dart';
-import 'score_screen.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -16,14 +15,12 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-          () => context.read<HoleViewModel>().startTracking(),
-    );
+    context.read<MapViewModel>().startTracking();
   }
 
   @override
   Widget build(BuildContext context) {
-    final vm = context.watch<HoleViewModel>();
+    final vm = context.watch<MapViewModel>();
 
     return Scaffold(
       appBar: AppBar(title: const Text("Hole map")),
@@ -32,12 +29,12 @@ class _MapScreenState extends State<MapScreen> {
           GoogleMap(
             mapType: MapType.satellite,
             myLocationEnabled: true,
-            onMapCreated: vm.onMapCreated,
             initialCameraPosition: const CameraPosition(
               target: LatLng(0, 0),
               zoom: 17,
             ),
-            onTap: vm.setGreen,
+            onMapCreated: vm.onMapCreated,
+            onTap: vm.onMapTap,
             markers: {
               if (vm.hole.tee != null)
                 Marker(
@@ -57,30 +54,26 @@ class _MapScreenState extends State<MapScreen> {
                 ),
             },
           ),
-
-          /// INFO
-          const Positioned(
-            bottom: 90,
-            left: 16,
-            right: 16,
-            child: InfoCard(),
+          const Positioned(bottom: 90, left: 20, right: 20, child: InfoCard()),
+          Positioned(
+            bottom: 20,
+            right: 20,
+            child: FloatingActionButton.extended(
+              label: Text(
+                vm.phase == HolePhase.waitingForTee
+                    ? "Sätt tee"
+                    : vm.phase == HolePhase.waitingForGreen
+                    ? "Sätt green"
+                    : "Score",
+              ),
+              onPressed: () {
+                if (vm.phase == HolePhase.playing) {
+                  Navigator.pushNamed(context, "/score");
+                }
+              },
+            ),
           ),
         ],
-      ),
-
-      floatingActionButton: FloatingActionButton.extended(
-        icon: const Icon(Icons.flag),
-        label: Text(vm.actionText),
-        onPressed: () {
-          if (vm.phase == HolePhase.waitingForTee) {
-            vm.setTee();
-          } else if (vm.phase == HolePhase.playing) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const ScoreScreen()),
-            );
-          }
-        },
       ),
     );
   }
