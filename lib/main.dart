@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mycaddie/viewmodels/weather_viewmodel.dart';
 import 'package:provider/provider.dart';
 
 import 'viewmodels/session_viewmodel.dart';
@@ -15,6 +16,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (_) => SessionViewModel()),
         ChangeNotifierProvider(create: (_) => MapViewModel()),
+        ChangeNotifierProvider(create: (_) => WeatherViewModel()),
         ChangeNotifierProvider(create: (_) => SettingsViewModel()),
       ],
       child: const MyCaddieApp(),

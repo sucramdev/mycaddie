@@ -19,14 +19,13 @@ class MapViewModel extends ChangeNotifier {
 
   MapPhase phase = MapPhase.waitingForTee;
 
-  final double windSpeed = 6.0; // mockad vind
-
   final List<Club> clubs = [
     Club("PW", 100),
     Club("7 Iron", 140),
     Club("Driver", 220),
   ];
 
+  bool _weatherLoaded = false;
   StreamSubscription<Position>? _sub;
 
   /// Startar GPS + följer användaren
@@ -45,8 +44,7 @@ class MapViewModel extends ChangeNotifier {
         distanceFilter: 3,
       ),
     ).listen((pos) {
-      position = pos;
-      notifyListeners();
+      onPositionUpdated(pos);
 
       if (mapController != null) {
         mapController!.animateCamera(
@@ -109,4 +107,17 @@ class MapViewModel extends ChangeNotifier {
     _sub?.cancel();
     super.dispose();
   }
+
+  void onPositionUpdated(Position pos) {
+    position = pos;
+
+    if (!_weatherLoaded) {
+      _weatherLoaded = true;
+      notifyListeners(); // triggar MapScreen första gången
+    }
+
+    notifyListeners();
+  }
+
+
 }

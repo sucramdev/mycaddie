@@ -32,7 +32,14 @@ class SessionViewModel extends ChangeNotifier {
   }
 
   void nextHole() {
-    _currentSession!.nextHole();
+    if (_currentSession == null) return;
+
+    if (_currentSession!.isFinished) {
+      finishSession();
+    } else {
+      _currentSession!.nextHole();
+    }
+
     notifyListeners();
   }
 
