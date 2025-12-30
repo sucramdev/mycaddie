@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../viewmodels/round_viewmodel.dart';
+import '../viewmodels/session_viewmodel.dart';
 
 class ScorecardScreen extends StatelessWidget {
   const ScorecardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final round = context.watch<RoundViewModel>();
+    final history = context.watch<SessionViewModel>().history;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Scorecard")),
+      appBar: AppBar(title: const Text("Historik")),
       body: ListView(
-        children: round.round.scores
-            .map((s) => ListTile(
-          title: Text("Hål ${s.holeNumber}"),
-          trailing: Text("${s.strokes} slag"),
-        ))
-            .toList(),
+        children: history.map((s) {
+          return ListTile(
+            title: Text(s.courseName),
+            subtitle: Text(
+              "Hål: ${s.holes.length} • ${s.startedAt}",
+            ),
+          );
+        }).toList(),
       ),
     );
   }

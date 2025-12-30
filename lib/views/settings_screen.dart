@@ -7,21 +7,21 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final settings = context.watch<SettingsViewModel>();
+    final s = context.watch<SettingsViewModel>();
 
     return Scaffold(
       appBar: AppBar(title: const Text("Inställningar")),
-      body: ListView(
+      body: Column(
         children: [
           SwitchListTile(
             title: const Text("Visa vind"),
-            value: settings.showWind,
-            onChanged: (_) => settings.toggleWind(),
+            value: s.showWind,
+            onChanged: (_) => s.toggleWind(),
           ),
           SwitchListTile(
-            title: const Text("Använd meter"),
-            value: settings.useMeters,
-            onChanged: (_) => settings.toggleUnits(),
+            title: const Text("Meter"),
+            value: s.useMeters,
+            onChanged: (_) => s.toggleUnits(),
           ),
         ],
       ),

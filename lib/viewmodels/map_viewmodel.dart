@@ -3,16 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../models/club.dart';
-import '../models/hole.dart';
 
-enum HolePhase { waitingForTee, waitingForGreen, playing }
+enum MapPhase {
+  waitingForTee,
+  waitingForGreen,
+  ready,
+}
 
 class MapViewModel extends ChangeNotifier {
   Position? position;
   GoogleMapController? mapController;
 
-  final Hole hole = Hole();
-  HolePhase phase = HolePhase.waitingForTee;
+  LatLng? tee;
+  LatLng? green;
+
+  MapPhase phase = MapPhase.waitingForTee;
 
   final double windSpeed = 6.0; // mockad vind
 
@@ -24,7 +29,16 @@ class MapViewModel extends ChangeNotifier {
 
   StreamSubscription<Position>? _sub;
 
+  /// Startar GPS + följer användaren
   Future<void> startTracking() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return;
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+
     _sub = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
         accuracy: LocationAccuracy.high,
@@ -48,39 +62,51 @@ class MapViewModel extends ChangeNotifier {
     mapController = controller;
   }
 
+  /// Sätt tee = din nuvarande position
+  void setTee() {
+    if (position == null) return;
+
+    tee = LatLng(position!.latitude, position!.longitude);
+    phase = MapPhase.waitingForGreen;
+    notifyListeners();
+  }
+
+  /// Klick på karta – används bara för green
   void onMapTap(LatLng point) {
-    if (phase == HolePhase.waitingForTee) {
-      hole.tee = point;
-      phase = HolePhase.waitingForGreen;
-    } else if (phase == HolePhase.waitingForGreen) {
-      hole.green = point;
-      phase = HolePhase.playing;
-    }
+    if (phase != MapPhase.waitingForGreen) return;
+
+    green = point;
+    phase = MapPhase.ready;
+    notifyListeners();
+  }
+
+  /// Flytta green igen
+  void resetGreen() {
+    green = null;
+    phase = MapPhase.waitingForGreen;
     notifyListeners();
   }
 
   double get distanceToGreen {
-    if (position == null || hole.green == null) return 0;
+    if (position == null || green == null) return 0;
     return Geolocator.distanceBetween(
       position!.latitude,
       position!.longitude,
-      hole.green!.latitude,
-      hole.green!.longitude,
+      green!.latitude,
+      green!.longitude,
     );
   }
 
   Club get recommendedClub {
-    final adjusted = distanceToGreen + windSpeed * 4;
     return clubs.firstWhere(
-          (c) => c.maxDistance >= adjusted,
+          (c) => c.maxDistance >= distanceToGreen,
       orElse: () => clubs.last,
     );
   }
 
-  void resetHole() {
-    hole.tee = null;
-    hole.green = null;
-    phase = HolePhase.waitingForTee;
-    notifyListeners();
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
   }
 }
