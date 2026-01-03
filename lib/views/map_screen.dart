@@ -172,7 +172,7 @@ class _MapScreenState extends State<MapScreen> {
             child: FloatingActionButton.extended(
               icon: const Icon(Icons.flag),
               label: Text(
-                  vm.nextShotState == NextShotState.WAITING_FOR_NEXT_SHOT ? "Sätt nästa slag" : "Ändra valt slag"
+                  vm.nextShotState == NextShotState.BEFORE_SET ? "Sätt nästa slag" : "Ändra valt slag"
               ),
               onPressed: () {
                 vm.resetNextShot();
@@ -187,7 +187,7 @@ class _MapScreenState extends State<MapScreen> {
             child: FloatingActionButton.extended(
               icon: const Icon(Icons.flag),
               label: Text(
-                  vm.greenState == GreenState.WAITING_FOR_GREEN ? "Sätt green" : "Ändra green"
+                  vm.greenState == GreenState.BEFORE_SET ? "Sätt green" : "Ändra green"
               ),
               onPressed: () {
                 vm.resetGreen();

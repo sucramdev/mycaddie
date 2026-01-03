@@ -7,6 +7,7 @@ import '../models/club.dart';
 enum NextShotState {
   WAITING_FOR_NEXT_SHOT,
   READY,
+  BEFORE_SET
   //waiting
 }
 
@@ -19,6 +20,7 @@ enum CurrentPositionState {
 enum GreenState {
   WAITING_FOR_GREEN,
   READY,
+  BEFORE_SET
   //waiting
 }
 
@@ -30,8 +32,8 @@ class MapViewModel extends ChangeNotifier {
   LatLng? nextShot;
   LatLng? green;
 
-  GreenState greenState = GreenState.WAITING_FOR_GREEN;
-  NextShotState nextShotState = NextShotState.WAITING_FOR_NEXT_SHOT;
+  GreenState greenState = GreenState.BEFORE_SET;
+  NextShotState nextShotState = NextShotState.BEFORE_SET;
   CurrentPositionState currentPositionState = CurrentPositionState.WAITING_FOR_CURRENT_POSITION;
 
   final List<Club> clubs = [
