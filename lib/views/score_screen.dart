@@ -17,26 +17,52 @@ class _ScoreScreenState extends State<ScoreScreen> {
   Widget build(BuildContext context) {
     final sessionVM = context.watch<SessionViewModel>();
     final mapVM = context.read<MapViewModel>();
+    final session = sessionVM.currentSession!;
 
-    final holeNumber = sessionVM.currentSession!.currentHole.number;
-    final par = sessionVM.currentSession!.currentHole.par;
+    final hole = session.currentHole;
+    final isLastHole = session.isFinished;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Registrera score")),
+      appBar: AppBar(title: const Text("Scorekort")),
       body: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(16),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              "Hål $holeNumber (Par $par)",
-              style: const TextStyle(fontSize: 22),
+            /// TIDIGARE HÅL
+            Expanded(
+              child: ListView(
+                children: session.scores
+                    .where((s) => s.strokes > 0)
+                    .map(
+                      (s) => ListTile(
+                    leading: const Icon(Icons.golf_course),
+                    title: Text("Hål ${s.holeNumber}"),
+                    trailing: Text(
+                      "${s.strokes} slag",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                )
+                    .toList(),
+              ),
             ),
-            const SizedBox(height: 24),
+
+            const Divider(),
+
+            /// AKTUELLT HÅL
+            Text(
+              "Hål ${hole.number} (Par ${hole.par})",
+              style: const TextStyle(fontSize: 20),
+            ),
+            const SizedBox(height: 12),
+
             Text(
               "$strokes slag",
               style: const TextStyle(fontSize: 36),
             ),
+
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -52,14 +78,30 @@ class _ScoreScreenState extends State<ScoreScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 32),
+
+            const SizedBox(height: 16),
+
             ElevatedButton(
-              child: const Text("Spara & nästa hål"),
+              child: Text(
+                isLastHole
+                    ? "Spara & avsluta rundan"
+                    : "Spara & nästa hål",
+              ),
               onPressed: () {
                 sessionVM.registerScore(strokes);
-                sessionVM.nextHole();
-                mapVM.resetGreen(); // redo för nästa hål
-                Navigator.pop(context);
+
+                if (isLastHole) {
+                  sessionVM.finishSession();
+                  Navigator.popUntil(
+                    context,
+                        (route) => route.isFirst,
+                  );
+                } else {
+                  sessionVM.nextHole();
+                  mapVM.resetStates();
+                  mapVM.resetMarkers();
+                  Navigator.pop(context);
+                }
               },
             ),
           ],

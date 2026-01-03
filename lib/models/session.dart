@@ -25,4 +25,11 @@ class Session {
   void nextHole() {
     if (!isFinished) currentHoleIndex++;
   }
+
+  // Statistik
+  int get totalStrokes =>
+      scores.fold(0, (sum, s) => sum + s.strokes);
+
+  double get averageStrokes =>
+      totalStrokes / scores.length;
 }

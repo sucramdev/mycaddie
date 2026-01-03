@@ -157,7 +157,7 @@ class MapViewModel extends ChangeNotifier {
 
   Club get recommendedClub {
     return clubs.firstWhere(
-          (c) => c.maxDistance >= distanceToGreen,
+          (c) => c.maxDistance >= distanceToNextShot,
       orElse: () => clubs.last,
     );
   }

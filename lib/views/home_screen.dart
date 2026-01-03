@@ -30,22 +30,40 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 24),
 
           const Text(
-            "Tidigare sessioner",
+            "Tidigare rundor",
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
 
           if (sessionVM.history.isEmpty)
             const Padding(
               padding: EdgeInsets.all(12),
-              child: Text("Inga sessioner ännu."),
+              child: Text("Inga rundor ännu."),
             )
           else
             ...sessionVM.history.map((s) {
               return Card(
                 child: ListTile(
+                  leading: const Icon(Icons.golf_course),
                   title: Text(s.courseName),
                   subtitle: Text(
-                    "${s.holes.length} hål • ${s.startedAt.toLocal()}",
+                    "${s.holes.length} hål • "
+                        "${s.startedAt.toLocal().toString().substring(0, 16)}",
+                  ),
+                  trailing: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "${s.totalStrokes}",
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Text(
+                        "slag",
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ],
                   ),
                 ),
               );
