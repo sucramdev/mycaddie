@@ -2,29 +2,49 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
 import '../models/club.dart';
+import '../viewmodels/settings_viewmodel.dart';
 
 enum NextShotState {
   WAITING_FOR_NEXT_SHOT,
   READY,
-  BEFORE_SET
-  //waiting
+  BEFORE_SET,
 }
 
 enum CurrentPositionState {
   WAITING_FOR_CURRENT_POSITION,
   READY,
-  //waiting
 }
 
 enum GreenState {
   WAITING_FOR_GREEN,
   READY,
-  BEFORE_SET
-  //waiting
+  BEFORE_SET,
 }
 
 class MapViewModel extends ChangeNotifier {
+  MapViewModel(this._settings) {
+    _settings.addListener(_onSettingsChanged);
+  }
+
+  SettingsViewModel _settings;
+
+  // Om ProxyProvider skulle vilja byta settings-instans (ovanligt, men korrekt att stödja)
+  void updateSettings(SettingsViewModel newSettings) {
+    if (identical(_settings, newSettings)) return;
+    _settings.removeListener(_onSettingsChanged);
+    _settings = newSettings;
+    _settings.addListener(_onSettingsChanged);
+    notifyListeners();
+  }
+
+  void _onSettingsChanged() {
+    // När klubblistor/distanser ändras vill vi att UI uppdateras
+    notifyListeners();
+  }
+
+  // ---- GPS / karta ----
   Position? position;
   GoogleMapController? mapController;
 
@@ -34,33 +54,30 @@ class MapViewModel extends ChangeNotifier {
 
   GreenState greenState = GreenState.BEFORE_SET;
   NextShotState nextShotState = NextShotState.BEFORE_SET;
-  CurrentPositionState currentPositionState = CurrentPositionState.WAITING_FOR_CURRENT_POSITION;
-
-  final List<Club> clubs = [
-    Club("SW", 90),
-    Club("PW", 110),
-    Club("9 Iron", 120),
-    Club("8 Iron", 135),
-    Club("7 Iron", 150),
-    Club("6 Iron", 165),
-    Club("5 Iron", 180),
-    Club("4 Iron", 190),
-    Club("Driver", 220),
-  ];
+  CurrentPositionState currentPositionState =
+      CurrentPositionState.WAITING_FOR_CURRENT_POSITION;
 
   bool _weatherLoaded = false;
   StreamSubscription<Position>? _sub;
 
+  /// Läs klubbor från SettingsViewModel (ingen hårdkodning här)
+  List<Club> get clubs => _settings.clubs;
+
   /// Startar GPS + följer användaren
   Future<void> startTracking() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) return;
 
-    LocationPermission permission = await Geolocator.checkPermission();
+    var permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      return;
+    }
 
+    _sub?.cancel();
     _sub = Geolocator.getPositionStream(
       locationSettings: const LocationSettings(
         accuracy: LocationAccuracy.high,
@@ -69,11 +86,10 @@ class MapViewModel extends ChangeNotifier {
     ).listen((pos) {
       onPositionUpdated(pos);
 
-      if (mapController != null) {
-        mapController!.animateCamera(
-          CameraUpdate.newLatLng(
-            LatLng(pos.latitude, pos.longitude),
-          ),
+      final controller = mapController;
+      if (controller != null) {
+        controller.animateCamera(
+          CameraUpdate.newLatLng(LatLng(pos.latitude, pos.longitude)),
         );
       }
     });
@@ -83,12 +99,14 @@ class MapViewModel extends ChangeNotifier {
     currentPositionState = CurrentPositionState.WAITING_FOR_CURRENT_POSITION;
     nextShotState = NextShotState.BEFORE_SET;
     greenState = GreenState.BEFORE_SET;
+    notifyListeners();
   }
 
   void resetMarkers() {
     green = null;
     nextShot = null;
     currentPosition = null;
+    notifyListeners();
   }
 
   void onMapCreated(GoogleMapController controller) {
@@ -104,16 +122,19 @@ class MapViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Klick på karta – används bara för green
+  /// Klick på karta – används för green och nästa slag
   void onMapTap(LatLng point) {
-    if (greenState != GreenState.WAITING_FOR_GREEN && nextShotState != NextShotState.WAITING_FOR_NEXT_SHOT) return;
+    final waitingForGreen = greenState == GreenState.WAITING_FOR_GREEN;
+    final waitingForNext = nextShotState == NextShotState.WAITING_FOR_NEXT_SHOT;
 
-    if(greenState == GreenState.WAITING_FOR_GREEN) {
+    if (!waitingForGreen && !waitingForNext) return;
+
+    if (waitingForGreen) {
       green = point;
       greenState = GreenState.READY;
     }
 
-    if(nextShotState == NextShotState.WAITING_FOR_NEXT_SHOT) {
+    if (waitingForNext) {
       nextShot = point;
       nextShotState = NextShotState.READY;
     }
@@ -121,14 +142,12 @@ class MapViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Flytta green igen
   void resetGreen() {
     green = null;
     greenState = GreenState.WAITING_FOR_GREEN;
     notifyListeners();
   }
 
-  /// Flytta green igen
   void resetNextShot() {
     nextShot = null;
     nextShotState = NextShotState.WAITING_FOR_NEXT_SHOT;
@@ -156,16 +175,17 @@ class MapViewModel extends ChangeNotifier {
   }
 
   Club get recommendedClub {
-    return clubs.firstWhere(
-          (c) => c.maxDistance >= distanceToNextShot,
-      orElse: () => clubs.last,
-    );
-  }
+    final list = clubs;
+    if (list.isEmpty) {
+      // Om du vill: kasta exception eller returnera en default.
+      // Här väljer vi en defensiv fallback.
+      return Club("N/A", 0);
+    }
 
-  @override
-  void dispose() {
-    _sub?.cancel();
-    super.dispose();
+    return list.firstWhere(
+          (c) => c.maxDistance >= distanceToNextShot,
+      orElse: () => list.last,
+    );
   }
 
   void onPositionUpdated(Position pos) {
@@ -174,10 +194,16 @@ class MapViewModel extends ChangeNotifier {
     if (!_weatherLoaded) {
       _weatherLoaded = true;
       notifyListeners(); // triggar MapScreen första gången
+      return;
     }
 
     notifyListeners();
   }
 
-
+  @override
+  void dispose() {
+    _settings.removeListener(_onSettingsChanged);
+    _sub?.cancel();
+    super.dispose();
+  }
 }

@@ -12,17 +12,24 @@ import 'views/score_screen.dart';
 
 void main() {
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => SessionViewModel()),
-        ChangeNotifierProvider(create: (_) => MapViewModel()),
-        ChangeNotifierProvider(create: (_) => WeatherViewModel()),
-        ChangeNotifierProvider(create: (_) => SettingsViewModel()),
-      ],
-      child: const MyCaddieApp(),
-    ),
-  );
-}
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => SessionViewModel()),
+          ChangeNotifierProvider(create: (_) => WeatherViewModel()),
+          ChangeNotifierProvider(create: (_) => SettingsViewModel()),
+
+          ChangeNotifierProxyProvider<SettingsViewModel, MapViewModel>(
+            create: (context) => MapViewModel(context.read<SettingsViewModel>()),
+            update: (context, settings, mapVm) {
+              if (mapVm == null) return MapViewModel(settings);
+              mapVm.updateSettings(settings);
+              return mapVm;
+            },
+          ),
+        ],
+        child: const MyCaddieApp(),
+      ));
+  }
 
 class MyCaddieApp extends StatelessWidget {
   const MyCaddieApp({super.key});
