@@ -110,7 +110,7 @@ class _MapScreenState extends State<MapScreen> {
           /// INFO-KORT
           if ((vm.currentPositionState == CurrentPositionState.READY && vm.greenState == GreenState.READY) || (vm.currentPositionState == CurrentPositionState.READY && vm.nextShotState == NextShotState.READY))
             Positioned(
-              bottom: 120,
+              top: 0,
               left: 16,
               right: 16,
               child: Card(
@@ -206,6 +206,7 @@ class _MapScreenState extends State<MapScreen> {
                 onPressed: () {
                   Navigator.pushNamed(context, '/score');
                   vm.resetStates();
+                  vm.resetMarkers();
                 },
               ),
             ),

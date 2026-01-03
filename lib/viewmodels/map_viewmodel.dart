@@ -81,8 +81,14 @@ class MapViewModel extends ChangeNotifier {
 
   void resetStates() {
     currentPositionState = CurrentPositionState.WAITING_FOR_CURRENT_POSITION;
-    nextShotState = NextShotState.WAITING_FOR_NEXT_SHOT;
-    greenState = GreenState.WAITING_FOR_GREEN;
+    nextShotState = NextShotState.BEFORE_SET;
+    greenState = GreenState.BEFORE_SET;
+  }
+
+  void resetMarkers() {
+    green = null;
+    nextShot = null;
+    currentPosition = null;
   }
 
   void onMapCreated(GoogleMapController controller) {
