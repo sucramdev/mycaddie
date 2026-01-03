@@ -4,24 +4,33 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../models/club.dart';
 
-enum MapPhase {
-  waitingForTee,
-  waitingForGreen,
-  ready,
+enum MapState {
+  WAITING_FOR_CURRENT_POSITION,
+  WAITING_FOR_GREEN,
+  WAITING_FOR_NEXT_SHOT,
+  READY,
+  //waiting
 }
 
 class MapViewModel extends ChangeNotifier {
   Position? position;
   GoogleMapController? mapController;
 
-  LatLng? tee;
+  LatLng? currentPosition;
+  LatLng? nextShot;
   LatLng? green;
 
-  MapPhase phase = MapPhase.waitingForTee;
+  MapState state = MapState.WAITING_FOR_CURRENT_POSITION;
 
   final List<Club> clubs = [
-    Club("PW", 100),
-    Club("7 Iron", 140),
+    Club("SW", 90),
+    Club("PW", 110),
+    Club("9 Iron", 120),
+    Club("8 Iron", 135),
+    Club("7 Iron", 150),
+    Club("6 Iron", 165),
+    Club("5 Iron", 180),
+    Club("4 Iron", 190),
     Club("Driver", 220),
   ];
 
@@ -61,27 +70,49 @@ class MapViewModel extends ChangeNotifier {
   }
 
   /// Sätt tee = din nuvarande position
-  void setTee() {
+  void setCurrentPosition() {
     if (position == null) return;
 
-    tee = LatLng(position!.latitude, position!.longitude);
-    phase = MapPhase.waitingForGreen;
+    currentPosition = LatLng(position!.latitude, position!.longitude);
+    state = MapState.WAITING_FOR_GREEN;
+    notifyListeners();
+  }
+
+  void setNextShot() {
+    if (position == null) return;
+
+    currentPosition = LatLng(position!.latitude, position!.longitude);
+    state = MapState.WAITING_FOR_GREEN;
     notifyListeners();
   }
 
   /// Klick på karta – används bara för green
   void onMapTap(LatLng point) {
-    if (phase != MapPhase.waitingForGreen) return;
+    if (state != MapState.WAITING_FOR_GREEN || state != MapState.WAITING_FOR_NEXT_SHOT) return;
 
-    green = point;
-    phase = MapPhase.ready;
+    if(state == MapState.WAITING_FOR_GREEN) {
+      green = point;
+    }
+
+    if(state == MapState.WAITING_FOR_NEXT_SHOT) {
+      nextShot = point;
+      state = MapState.READY;
+    }
+
     notifyListeners();
   }
 
   /// Flytta green igen
   void resetGreen() {
     green = null;
-    phase = MapPhase.waitingForGreen;
+    state = MapState.WAITING_FOR_GREEN;
+    notifyListeners();
+  }
+
+  /// Flytta green igen
+  void resetNextShot() {
+    nextShot = null;
+    state = MapState.WAITING_FOR_NEXT_SHOT;
     notifyListeners();
   }
 
@@ -92,6 +123,16 @@ class MapViewModel extends ChangeNotifier {
       position!.longitude,
       green!.latitude,
       green!.longitude,
+    );
+  }
+
+  double get distanceToNextShot {
+    if (position == null || nextShot == null) return 0;
+    return Geolocator.distanceBetween(
+      position!.latitude,
+      position!.longitude,
+      nextShot!.latitude,
+      nextShot!.longitude,
     );
   }
 

@@ -80,12 +80,20 @@ class _MapScreenState extends State<MapScreen> {
             onMapCreated: vm.onMapCreated,
             onTap: vm.onMapTap,
             markers: {
-              if (vm.tee != null)
+              if (vm.currentPosition != null)
                 Marker(
-                  markerId: const MarkerId("tee"),
-                  position: vm.tee!,
+                  markerId: const MarkerId("Sätt position"),
+                  position: vm.currentPosition!,
                   icon: BitmapDescriptor.defaultMarkerWithHue(
                     BitmapDescriptor.hueBlue,
+                  ),
+                ),
+              if (vm.nextShot != null)
+                Marker(
+                  markerId: const MarkerId("Sätt ut position för nästa slag"),
+                  position: vm.nextShot!,
+                  icon: BitmapDescriptor.defaultMarkerWithHue(
+                    BitmapDescriptor.hueRed,
                   ),
                 ),
               if (vm.green != null)
@@ -100,7 +108,7 @@ class _MapScreenState extends State<MapScreen> {
           ),
 
           /// INFO-KORT
-          if (vm.phase == MapPhase.ready)
+          if (vm.state == MapState.READY)
             Positioned(
               bottom: 120,
               left: 16,
@@ -117,6 +125,10 @@ class _MapScreenState extends State<MapScreen> {
                     children: [
                       Text(
                         "${vm.distanceToGreen.round()} m till green",
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                      Text(
+                        "${vm.distanceToNextShot.round()} m till din destination",
                         style: const TextStyle(fontSize: 18),
                       ),
                   Text(
@@ -141,24 +153,39 @@ class _MapScreenState extends State<MapScreen> {
             child: FloatingActionButton.extended(
               icon: const Icon(Icons.flag),
               label: Text(
-                vm.phase == MapPhase.waitingForTee
+                vm.state == MapState.WAITING_FOR_CURRENT_POSITION
                     ? "Sätt tee"
-                    : vm.phase == MapPhase.waitingForGreen
+                    : vm.state == MapState.WAITING_FOR_GREEN
                     ? "Sätt green"
                     : "Ändra green",
               ),
               onPressed: () {
-                if (vm.phase == MapPhase.waitingForTee) {
-                  vm.setTee();
-                } else if (vm.phase == MapPhase.ready) {
+                if (vm.state == MapState.WAITING_FOR_CURRENT_POSITION) {
+                  vm.setCurrentPosition();
+                } else if (vm.state == MapState.READY) {
                   vm.resetGreen();
                 }
               },
             ),
           ),
 
+          /// SÄTT UT VART VI SKA SLÅ
+          Positioned(
+            bottom: 40,
+            right: 20,
+            child: FloatingActionButton.extended(
+              icon: const Icon(Icons.flag),
+              label: Text(
+                  vm.state == MapState.WAITING_FOR_NEXT_SHOT ? "Sätt nästa slag" : "Ändra valt slag"
+              ),
+              onPressed: () {
+                vm.resetNextShot();
+              },
+            ),
+          ),
+
           /// AVSLUTA HÅL
-          if (vm.phase == MapPhase.ready)
+          if (vm.state == MapState.READY)
             Positioned(
               bottom: 20,
               left: 20,
