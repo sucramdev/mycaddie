@@ -108,7 +108,7 @@ class _MapScreenState extends State<MapScreen> {
           ),
 
           /// INFO-KORT
-          if (vm.state == MapState.READY)
+          if ((vm.currentPositionState == CurrentPositionState.READY && vm.greenState == GreenState.READY) || (vm.currentPositionState == CurrentPositionState.READY && vm.nextShotState == NextShotState.READY))
             Positioned(
               bottom: 120,
               left: 16,
@@ -123,16 +123,18 @@ class _MapScreenState extends State<MapScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        "${vm.distanceToGreen.round()} m till green",
-                        style: const TextStyle(fontSize: 18),
-                      ),
-                      Text(
-                        "${vm.distanceToNextShot.round()} m till din destination",
-                        style: const TextStyle(fontSize: 18),
-                      ),
+                      if(vm.greenState == GreenState.READY)
+                          Text(
+                            "${vm.distanceToGreen.round()} m till green",
+                            style: const TextStyle(fontSize: 18),
+                          ),
+                      if(vm.nextShotState == NextShotState.READY)
+                        Text(
+                          "${vm.distanceToNextShot.round()} m till din destination",
+                          style: const TextStyle(fontSize: 18),
+                        ),
                   Text(
-                    "Temp: ${context.watch<WeatherViewModel>().weather?.temperature}°C | "
+                        "Temp: ${context.watch<WeatherViewModel>().weather?.temperature}°C | "
                         "Vind: ${context.watch<WeatherViewModel>().weather?.windSpeed} m/s",
                   ),
                       const SizedBox(height: 6),
@@ -146,37 +148,31 @@ class _MapScreenState extends State<MapScreen> {
               ),
             ),
 
-          /// ACTION-KNAPP
+          /// Sätt current position
           Positioned(
             bottom: 20,
             right: 20,
             child: FloatingActionButton.extended(
               icon: const Icon(Icons.flag),
               label: Text(
-                vm.state == MapState.WAITING_FOR_CURRENT_POSITION
-                    ? "Sätt tee"
-                    : vm.state == MapState.WAITING_FOR_GREEN
-                    ? "Sätt green"
-                    : "Ändra green",
+                vm.currentPositionState == CurrentPositionState.WAITING_FOR_CURRENT_POSITION
+                    ? "Sätt position"
+                    : "Ändra position",
               ),
               onPressed: () {
-                if (vm.state == MapState.WAITING_FOR_CURRENT_POSITION) {
                   vm.setCurrentPosition();
-                } else if (vm.state == MapState.READY) {
-                  vm.resetGreen();
-                }
               },
             ),
           ),
 
           /// SÄTT UT VART VI SKA SLÅ
           Positioned(
-            bottom: 40,
+            bottom: 80,
             right: 20,
             child: FloatingActionButton.extended(
               icon: const Icon(Icons.flag),
               label: Text(
-                  vm.state == MapState.WAITING_FOR_NEXT_SHOT ? "Sätt nästa slag" : "Ändra valt slag"
+                  vm.nextShotState == NextShotState.WAITING_FOR_NEXT_SHOT ? "Sätt nästa slag" : "Ändra valt slag"
               ),
               onPressed: () {
                 vm.resetNextShot();
@@ -184,8 +180,22 @@ class _MapScreenState extends State<MapScreen> {
             ),
           ),
 
+          /// SÄTT UT GREEN
+          Positioned(
+            bottom: 140,
+            right: 20,
+            child: FloatingActionButton.extended(
+              icon: const Icon(Icons.flag),
+              label: Text(
+                  vm.greenState == GreenState.WAITING_FOR_GREEN ? "Sätt green" : "Ändra green"
+              ),
+              onPressed: () {
+                vm.resetGreen();
+              },
+            ),
+          ),
+
           /// AVSLUTA HÅL
-          if (vm.state == MapState.READY)
             Positioned(
               bottom: 20,
               left: 20,
@@ -195,6 +205,7 @@ class _MapScreenState extends State<MapScreen> {
                 label: const Text("Avsluta hål"),
                 onPressed: () {
                   Navigator.pushNamed(context, '/score');
+                  vm.resetStates();
                 },
               ),
             ),

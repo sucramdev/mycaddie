@@ -4,10 +4,20 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../models/club.dart';
 
-enum MapState {
-  WAITING_FOR_CURRENT_POSITION,
-  WAITING_FOR_GREEN,
+enum NextShotState {
   WAITING_FOR_NEXT_SHOT,
+  READY,
+  //waiting
+}
+
+enum CurrentPositionState {
+  WAITING_FOR_CURRENT_POSITION,
+  READY,
+  //waiting
+}
+
+enum GreenState {
+  WAITING_FOR_GREEN,
   READY,
   //waiting
 }
@@ -20,7 +30,9 @@ class MapViewModel extends ChangeNotifier {
   LatLng? nextShot;
   LatLng? green;
 
-  MapState state = MapState.WAITING_FOR_CURRENT_POSITION;
+  GreenState greenState = GreenState.WAITING_FOR_GREEN;
+  NextShotState nextShotState = NextShotState.WAITING_FOR_NEXT_SHOT;
+  CurrentPositionState currentPositionState = CurrentPositionState.WAITING_FOR_CURRENT_POSITION;
 
   final List<Club> clubs = [
     Club("SW", 90),
@@ -65,6 +77,12 @@ class MapViewModel extends ChangeNotifier {
     });
   }
 
+  void resetStates() {
+    currentPositionState = CurrentPositionState.WAITING_FOR_CURRENT_POSITION;
+    nextShotState = NextShotState.WAITING_FOR_NEXT_SHOT;
+    greenState = GreenState.WAITING_FOR_GREEN;
+  }
+
   void onMapCreated(GoogleMapController controller) {
     mapController = controller;
   }
@@ -74,29 +92,22 @@ class MapViewModel extends ChangeNotifier {
     if (position == null) return;
 
     currentPosition = LatLng(position!.latitude, position!.longitude);
-    state = MapState.WAITING_FOR_GREEN;
-    notifyListeners();
-  }
-
-  void setNextShot() {
-    if (position == null) return;
-
-    currentPosition = LatLng(position!.latitude, position!.longitude);
-    state = MapState.WAITING_FOR_GREEN;
+    currentPositionState = CurrentPositionState.READY;
     notifyListeners();
   }
 
   /// Klick på karta – används bara för green
   void onMapTap(LatLng point) {
-    if (state != MapState.WAITING_FOR_GREEN || state != MapState.WAITING_FOR_NEXT_SHOT) return;
+    if (greenState != GreenState.WAITING_FOR_GREEN && nextShotState != NextShotState.WAITING_FOR_NEXT_SHOT) return;
 
-    if(state == MapState.WAITING_FOR_GREEN) {
+    if(greenState == GreenState.WAITING_FOR_GREEN) {
       green = point;
+      greenState = GreenState.READY;
     }
 
-    if(state == MapState.WAITING_FOR_NEXT_SHOT) {
+    if(nextShotState == NextShotState.WAITING_FOR_NEXT_SHOT) {
       nextShot = point;
-      state = MapState.READY;
+      nextShotState = NextShotState.READY;
     }
 
     notifyListeners();
@@ -105,14 +116,14 @@ class MapViewModel extends ChangeNotifier {
   /// Flytta green igen
   void resetGreen() {
     green = null;
-    state = MapState.WAITING_FOR_GREEN;
+    greenState = GreenState.WAITING_FOR_GREEN;
     notifyListeners();
   }
 
   /// Flytta green igen
   void resetNextShot() {
     nextShot = null;
-    state = MapState.WAITING_FOR_NEXT_SHOT;
+    nextShotState = NextShotState.WAITING_FOR_NEXT_SHOT;
     notifyListeners();
   }
 
