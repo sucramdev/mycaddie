@@ -51,6 +51,8 @@ class MapViewModel extends ChangeNotifier {
   LatLng? currentPosition;
   LatLng? nextShot;
   LatLng? green;
+  LatLng? _previousPosition;
+  double? lastShotDistance;
 
   GreenState greenState = GreenState.BEFORE_SET;
   NextShotState nextShotState = NextShotState.BEFORE_SET;
@@ -117,10 +119,35 @@ class MapViewModel extends ChangeNotifier {
   void setCurrentPosition() {
     if (position == null) return;
 
+    _previousPosition = currentPosition;
     currentPosition = LatLng(position!.latitude, position!.longitude);
+
+    calculateShotDistance();
+
+    // slaget är nu klart → kräver nytt mål nästa gång
+    nextShot = null;
+    nextShotState = NextShotState.BEFORE_SET;
+
+
     currentPositionState = CurrentPositionState.READY;
     notifyListeners();
   }
+
+  void calculateShotDistance() {
+    if (_previousPosition == null || currentPosition == null || nextShot == null) return;
+
+    lastShotDistance = Geolocator.distanceBetween(
+      _previousPosition!.latitude,
+      _previousPosition!.longitude,
+      currentPosition!.latitude,
+      currentPosition!.longitude,
+    );
+
+  }
+
+
+
+
 
   /// Klick på karta – används för green och nästa slag
   void onMapTap(LatLng point) {
