@@ -1,35 +1,41 @@
 import 'package:flutter/material.dart';
-import 'package:mycaddie/viewmodels/weather_viewmodel.dart';
 import 'package:provider/provider.dart';
 
 import 'viewmodels/session_viewmodel.dart';
-import 'viewmodels/map_viewmodel.dart';
+import 'viewmodels/weather_viewmodel.dart';
 import 'viewmodels/settings_viewmodel.dart';
+import 'viewmodels/map_viewmodel.dart';
 
 import 'views/home_screen.dart';
 import 'views/map_screen.dart';
 import 'views/score_screen.dart';
 
-void main() {
-  runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => SessionViewModel()),
-          ChangeNotifierProvider(create: (_) => WeatherViewModel()),
-          ChangeNotifierProvider(create: (_) => SettingsViewModel()),
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-          ChangeNotifierProxyProvider<SettingsViewModel, MapViewModel>(
-            create: (context) => MapViewModel(context.read<SettingsViewModel>()),
-            update: (context, settings, mapVm) {
-              if (mapVm == null) return MapViewModel(settings);
-              mapVm.updateSettings(settings);
-              return mapVm;
-            },
-          ),
-        ],
-        child: const MyCaddieApp(),
-      ));
-  }
+  final settingsVm = SettingsViewModel();
+  await settingsVm.load(); // VIKTIGT: vänta in load
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => SessionViewModel()),
+        ChangeNotifierProvider(create: (_) => WeatherViewModel()),
+        ChangeNotifierProvider.value(value: settingsVm),
+
+        ChangeNotifierProxyProvider<SettingsViewModel, MapViewModel>(
+          create: (context) => MapViewModel(context.read<SettingsViewModel>()),
+          update: (context, settings, mapVm) {
+            if (mapVm == null) return MapViewModel(settings);
+            mapVm.updateSettings(settings);
+            return mapVm;
+          },
+        ),
+      ],
+      child: const MyCaddieApp(),
+    ),
+  );
+}
 
 class MyCaddieApp extends StatelessWidget {
   const MyCaddieApp({super.key});
