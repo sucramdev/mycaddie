@@ -196,6 +196,12 @@ class _MapScreenState extends State<MapScreen> {
                           },
                         ),
 
+                        if (mapVm.lastShotDistance != null)
+                          _infoRow(
+                            icon: Icons.navigation,
+                            text:
+                            "Senaste slag: ${mapVm.lastShotDistance!.toStringAsFixed(1)} m",
+                          ),
                         const SizedBox(height: 8),
 
                         const Text(
@@ -213,13 +219,6 @@ class _MapScreenState extends State<MapScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        if (mapVm.lastShotDistance != null)
-                          _infoRow(
-                            icon: Icons.navigation,
-                            text:
-                            "Du slog ${mapVm.lastShotDistance} m",
-                          )
-
                       ] else ...[
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
