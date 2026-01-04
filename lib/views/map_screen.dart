@@ -213,6 +213,13 @@ class _MapScreenState extends State<MapScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        if (mapVm.lastShotDistance != null)
+                          _infoRow(
+                            icon: Icons.navigation,
+                            text:
+                            "Du slog ${mapVm.lastShotDistance} m",
+                          )
+
                       ] else ...[
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
