@@ -2,6 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mycaddie/models/shot.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/club.dart';
 import '../viewmodels/settings_viewmodel.dart';
@@ -61,6 +64,8 @@ class MapViewModel extends ChangeNotifier {
 
   bool _weatherLoaded = false;
   StreamSubscription<Position>? _sub;
+
+
 
   /// Läs klubbor från SettingsViewModel (ingen hårdkodning här)
   List<Club> get clubs => _settings.clubs;
@@ -124,10 +129,20 @@ class MapViewModel extends ChangeNotifier {
 
     calculateShotDistance();
 
+    String clubName = recommendedClub.name;
+
+    if(lastShotDistance != null) {
+      for(int i = 0 ; i < clubs.length;i++) {
+        if(clubs[i].name == clubName) {
+          clubs[i].addShot(Shot(clubName, lastShotDistance!));
+        }
+      }
+    }
+
+
     // slaget är nu klart → kräver nytt mål nästa gång
     nextShot = null;
     nextShotState = NextShotState.BEFORE_SET;
-
 
     currentPositionState = CurrentPositionState.READY;
     notifyListeners();
@@ -145,8 +160,15 @@ class MapViewModel extends ChangeNotifier {
 
   }
 
+  void calcAvgAndSave() async {
+    // 1. Räkna om snitt för alla klubbor
+    for (int i = 0; i < clubs.length; i++) {
+      clubs[i].calcAverageDistance();
+    }
+    _settings.notifyListeners();
+    _settings.saveNewDistances();
 
-
+  }
 
 
   /// Klick på karta – används för green och nästa slag
@@ -210,7 +232,7 @@ class MapViewModel extends ChangeNotifier {
     }
 
     return list.firstWhere(
-          (c) => c.maxDistance >= distanceToNextShot,
+          (c) => c.averageDistance >= distanceToNextShot,
       orElse: () => list.last,
     );
   }

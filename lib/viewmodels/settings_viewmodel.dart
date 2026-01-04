@@ -7,6 +7,7 @@ class SettingsViewModel extends ChangeNotifier {
   static const _kShowWind = 'showWind';
   static const _kUseMeters = 'useMeters';
   static const _kClubsJson = 'clubsJson';
+  static const _kClubsStats = 'clubsStats';
 
   bool showWind = true;
   bool useMeters = true;
@@ -60,11 +61,16 @@ class SettingsViewModel extends ChangeNotifier {
       clubs
           .map((c) => {
         'name': c.name,
-        'maxDistance': c.maxDistance,
+        'maxDistance': c.averageDistance,
       })
           .toList(),
     );
     await prefs.setString(_kClubsJson, encoded);
+  }
+
+
+  void saveNewDistances() async {
+    await _save();
   }
 
   void toggleWind() {

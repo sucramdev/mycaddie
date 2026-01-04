@@ -22,7 +22,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final s = context.read<SettingsViewModel>();
     for (final club in s.clubs) {
       _controllers[club.name] = TextEditingController(
-        text: club.maxDistance.toStringAsFixed(0),
+        text: club.averageDistance.toStringAsFixed(0),
       );
     }
 
@@ -98,14 +98,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             final controller = _controllers.putIfAbsent(
               club.name,
                   () => TextEditingController(
-                text: club.maxDistance.toStringAsFixed(0),
+                text: club.averageDistance.toStringAsFixed(0),
               ),
             );
 
             return Card(
               child: ListTile(
                 title: Text(club.name),
-                subtitle: Text("${club.maxDistance.round()} m"),
+                subtitle: Text("${club.averageDistance.round()} m"),
                 trailing: SizedBox(
                   width: 110,
                   child: TextFormField(

@@ -92,6 +92,7 @@ class _ScoreScreenState extends State<ScoreScreen> {
 
                 if (isLastHole) {
                   sessionVM.finishSession();
+                  mapVM.calcAvgAndSave();
                   Navigator.popUntil(
                     context,
                         (route) => route.isFirst,
