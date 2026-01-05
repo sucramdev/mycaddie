@@ -69,7 +69,7 @@ class _MapScreenState extends State<MapScreen> {
         title: Text(
           session == null
               ? "Caddie Map"
-              : "${session.courseName} • Hål ${session.currentHole.number}",
+              : "${session.course.name} • Hål ${session.currentHole.number}",
         ),
       ),
       body: Stack(

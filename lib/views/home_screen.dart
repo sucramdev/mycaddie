@@ -23,7 +23,7 @@ class HomeScreen extends StatelessWidget {
               child: ListTile(
                 leading: const Icon(Icons.play_arrow),
                 title: Text("Fortsätt session"),
-                subtitle: Text("${currentSession.courseName} • Hål ${currentSession.currentHole.number}"),
+                subtitle: Text("${currentSession.course.name} • Hål ${currentSession.currentHole.number}"),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   Navigator.push(
@@ -64,7 +64,7 @@ class HomeScreen extends StatelessWidget {
               return Card(
                 child: ListTile(
                   leading: const Icon(Icons.golf_course),
-                  title: Text(s.courseName),
+                  title: Text(s.course.name),
                   subtitle: Text(
                     "${s.holes.length} hål • "
                         "${s.startedAt.toLocal().toString().substring(0, 16)}",

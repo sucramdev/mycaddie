@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/course.dart';
 import '../models/hole.dart';
 import '../models/session.dart';
 
@@ -12,6 +13,9 @@ class SessionViewModel extends ChangeNotifier {
   void startSession({
     required String courseName,
     required int holesCount,
+    required int coursePar,
+    required double courseRating,
+    required int slopeRating,
   }) {
     final holes = List.generate(
       holesCount,
@@ -19,7 +23,12 @@ class SessionViewModel extends ChangeNotifier {
     );
 
     _currentSession = Session(
-      courseName: courseName,
+      course: Course(
+        name: courseName,
+        coursePar: coursePar,
+        courseRating: courseRating,
+        slopeRating: slopeRating,
+      ),
       holes: holes,
     );
 

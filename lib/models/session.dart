@@ -1,8 +1,9 @@
 import 'hole.dart';
 import 'hole_score.dart';
+import 'course.dart';
 
 class Session {
-  final String courseName;
+  final Course course;
   final DateTime startedAt;
   final List<Hole> holes;
   final List<HoleScore> scores;
@@ -10,7 +11,7 @@ class Session {
   int currentHoleIndex = 0;
 
   Session({
-    required this.courseName,
+    required this.course,
     required this.holes,
   })  : startedAt = DateTime.now(),
         scores = holes
