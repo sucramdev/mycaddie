@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../viewmodels/session_viewmodel.dart';
 import 'start_session_screen.dart';
 import 'settings_screen.dart';
+import 'map_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -10,12 +11,31 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sessionVM = context.watch<SessionViewModel>();
+    final currentSession = sessionVM.currentSession;
 
     return Scaffold(
       appBar: AppBar(title: const Text("myCaddie")),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          if (currentSession != null) ...[
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.play_arrow),
+                title: Text("Fortsätt session"),
+                subtitle: Text("${currentSession.courseName} • Hål ${currentSession.currentHole.number}"),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const MapScreen()),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+
           ElevatedButton(
             child: const Text("Starta ny session"),
             onPressed: () {

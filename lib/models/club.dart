@@ -8,7 +8,7 @@ class Club {
   Club(this.name, this.averageDistance);
 
   void addShot(Shot shot){
-    //if(shot.distance < (averageDistance * 0.8) || shot.distance > (averageDistance * 1.2)) return;
+    if(shot.distance < (averageDistance * 0.8) || shot.distance > (averageDistance * 1.2)) return;
     shots.add(shot);
   }
 
