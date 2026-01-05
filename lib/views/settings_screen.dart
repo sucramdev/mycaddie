@@ -10,7 +10,8 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  final Map<String, TextEditingController> _controllers = {};
+  final Map<String, TextEditingController> _clubControllers = {};
+  late final TextEditingController _hcpController;
   bool _initialized = false;
 
   @override
@@ -20,8 +21,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (_initialized) return;
 
     final s = context.read<SettingsViewModel>();
+
+    // HCP controller
+    _hcpController = TextEditingController(
+      text: s.handicap.toStringAsFixed(1),
+    );
+
+    // Club controllers
     for (final club in s.clubs) {
-      _controllers[club.name] = TextEditingController(
+      _clubControllers[club.name] = TextEditingController(
         text: club.averageDistance.toStringAsFixed(0),
       );
     }
@@ -31,17 +39,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   void dispose() {
-    for (final c in _controllers.values) {
+    _hcpController.dispose();
+    for (final c in _clubControllers.values) {
       c.dispose();
     }
     super.dispose();
   }
 
-  Future<void> _saveClubs() async {
+  Future<void> _saveAll() async {
     final s = context.read<SettingsViewModel>();
 
+    // 1) Save handicap
+    final rawHcp = _hcpController.text.trim().replaceAll(',', '.');
+    final parsedHcp = double.tryParse(rawHcp);
+    if (parsedHcp != null) {
+      await s.setHandicap(parsedHcp);
+    }
+
+    // 2) Save clubs (avg/max distances depending on your Club meaning)
     final Map<String, double> distances = {};
-    for (final entry in _controllers.entries) {
+    for (final entry in _clubControllers.entries) {
       final raw = entry.value.text.trim().replaceAll(',', '.');
       final parsed = double.tryParse(raw);
       if (parsed != null) {
@@ -53,7 +70,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Klubbdistanser sparade")),
+      const SnackBar(content: Text("Inställningar sparade")),
     );
   }
 
@@ -68,7 +85,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           IconButton(
             tooltip: "Spara",
             icon: const Icon(Icons.save),
-            onPressed: _saveClubs,
+            onPressed: _saveAll,
           ),
         ],
       ),
@@ -85,9 +102,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
             value: s.useMeters,
             onChanged: (_) => s.toggleUnits(),
           ),
+
           const SizedBox(height: 12),
           const Text(
-            "Klubbdistanser (max)",
+            "Handicap",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          TextFormField(
+            controller: _hcpController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: const InputDecoration(
+              labelText: "HCP",
+              isDense: true,
+              border: OutlineInputBorder(),
+            ),
+          ),
+
+          const SizedBox(height: 12),
+          const Text(
+            "Klubbdistanser",
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
@@ -95,7 +129,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ...List.generate(s.clubs.length, (i) {
             final club = s.clubs[i];
 
-            final controller = _controllers.putIfAbsent(
+            final controller = _clubControllers.putIfAbsent(
               club.name,
                   () => TextEditingController(
                 text: club.averageDistance.toStringAsFixed(0),
@@ -110,7 +144,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   width: 110,
                   child: TextFormField(
                     controller: controller,
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                      signed: false,
+                    ),
                     decoration: const InputDecoration(
                       labelText: "meter",
                       isDense: true,
