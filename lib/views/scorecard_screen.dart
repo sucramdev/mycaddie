@@ -14,7 +14,7 @@ class ScorecardScreen extends StatelessWidget {
       body: ListView(
         children: history.map((s) {
           return ListTile(
-            title: Text(s.courseName),
+            title: Text(s.course.name),
             subtitle: Text(
               "Hål: ${s.holes.length} • ${s.startedAt}",
             ),

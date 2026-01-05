@@ -1,9 +1,11 @@
 class Hole {
   final int number;
-  final int par;
+  int par;
+  int hcpIndex;
 
   Hole({
     required this.number,
-    required this.par,
+    this.par = 0,
+    this.hcpIndex = 0,
   });
 }

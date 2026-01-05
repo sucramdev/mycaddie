@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/session_viewmodel.dart';
 import '../viewmodels/map_viewmodel.dart';
+import '../viewmodels/settings_viewmodel.dart';
 
 class ScoreScreen extends StatefulWidget {
   const ScoreScreen({super.key});
@@ -37,11 +38,24 @@ class _ScoreScreenState extends State<ScoreScreen> {
                       (s) => ListTile(
                     leading: const Icon(Icons.golf_course),
                     title: Text("Hål ${s.holeNumber}"),
-                    trailing: Text(
-                      "${s.strokes} slag",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    trailing: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          "${s.strokes} slag",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          "${s.points} p",
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 )
@@ -88,7 +102,8 @@ class _ScoreScreenState extends State<ScoreScreen> {
                     : "Spara & nästa hål",
               ),
               onPressed: () {
-                sessionVM.registerScore(strokes);
+                final settings = context.read<SettingsViewModel>();
+                sessionVM.registerScore(strokes, settings.handicap);
 
                 if (isLastHole) {
                   sessionVM.finishSession();

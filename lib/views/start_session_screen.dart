@@ -1,8 +1,80 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/course.dart'; // <-- se till att denna finns
 import '../viewmodels/map_viewmodel.dart';
 import '../viewmodels/session_viewmodel.dart';
 import 'map_screen.dart';
+
+
+final kCourses = <Course>[
+  Course(
+    name: "Bro Hof Slott GC",
+    courseRating: 74.2,
+    slopeRating: 137,
+    holePars: [
+      4,5,3,4,4,5,3,4,4,
+      4,5,3,4,4,5,3,4,4,
+    ],
+    holeHcpIndex: [
+      9,1,17,11,7,3,15,13,5,
+      10,2,18,12,6,4,16,8,14,
+    ],
+  ),
+
+  Course(
+    name: "Bromma 9-hålsbanan",
+    courseRating: 57.9,
+    slopeRating: 97,
+    holePars: [
+      3,3,3,3,3,4,3,3,4,
+    ],
+    holeHcpIndex: [
+      7,3,4,6,8,5,2,9,1,
+    ],
+  ),
+
+  Course(
+    name: "Drottningholm GK",
+    courseRating: 71.6,
+    slopeRating: 129,
+    holePars: [
+      4,4,3,5,4,4,3,5,4,
+      4,5,3,4,4,5,3,4,4,
+    ],
+    holeHcpIndex: [
+      11,3,17,1,9,7,15,5,13,
+      12,2,18,10,6,4,16,8,14,
+    ],
+  ),
+
+  Course(
+    name: "Lindö Dal",
+    courseRating: 69.2,
+    slopeRating: 124,
+    holePars: [
+      4,3,4,3,4,5,4,4,5,
+      4,3,4,4,3,4,4,3,5,
+    ],
+    holeHcpIndex: [
+      11,13,3,7,1,5,15,17,9,
+      10,6,4,16,8,14,2,18,12,
+    ],
+  ),
+
+  Course(
+    name: "Riksten",
+    courseRating: 70.2,
+    slopeRating: 125,
+    holePars: [
+      5,4,3,4,5,4,4,3,4,
+      4,4,5,3,4,5,3,4,4,
+    ],
+    holeHcpIndex: [
+      7,9,17,3,1,13,5,15,11,
+      12,2,6,18,14,4,16,8,10,
+    ],
+  ),
+];
 
 class StartSessionScreen extends StatefulWidget {
   const StartSessionScreen({super.key});
@@ -12,45 +84,86 @@ class StartSessionScreen extends StatefulWidget {
 }
 
 class _StartSessionScreenState extends State<StartSessionScreen> {
-  final _controller = TextEditingController();
-  int holes = 18;
+  Course? _selectedCourse;
+
+  @override
+  void initState() {
+    super.initState();
+    // Defaultval (valfritt)
+    if (kCourses.isNotEmpty) {
+      _selectedCourse = kCourses.first;
+    }
+  }
+
+  void _start() {
+    final course = _selectedCourse;
+    if (course == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Välj en golfbana.")),
+      );
+      return;
+    }
+
+    final mapVm = context.read<MapViewModel>();
+    mapVm.resetForNewSession();
+
+    // OBS: Detta kräver att din SessionViewModel.startSession tar emot Course.
+    // Dvs: startSession({ required Course course })
+    context.read<SessionViewModel>().startSession(course: course);
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const MapScreen()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final course = _selectedCourse;
+
     return Scaffold(
       appBar: AppBar(title: const Text("Ny session")),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: Column(
+        child: ListView(
           children: [
-            TextField(
-              controller: _controller,
-              decoration: const InputDecoration(labelText: "Golfbana"),
+            DropdownButtonFormField<Course>(
+              value: course,
+              decoration: const InputDecoration(
+                labelText: "Välj golfbana",
+                border: OutlineInputBorder(),
+              ),
+              items: kCourses
+                  .map(
+                    (c) => DropdownMenuItem<Course>(
+                  value: c,
+                  child: Text(c.name),
+                ),
+              )
+                  .toList(),
+              onChanged: (c) => setState(() => _selectedCourse = c),
             ),
-            DropdownButton<int>(
-              value: holes,
-              items: const [
-                DropdownMenuItem(value: 9, child: Text("9 hål")),
-                DropdownMenuItem(value: 18, child: Text("18 hål")),
-              ],
-              onChanged: (v) => setState(() => holes = v!),
-            ),
+            const SizedBox(height: 12),
+
+            // Visar vald ban-data (read-only), så användaren slipper skriva in
+            if (course != null) ...[
+              Card(
+                child: ListTile(
+                  title: const Text("Baninfo"),
+                  subtitle: Text(
+                    "Par: ${course.coursePar}\n"
+                        "Course rating: ${course.courseRating}\n"
+                        "Slope: ${course.slopeRating}\n"
+                        "Hål: ${course.holePars.length}",
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+
             ElevatedButton(
+              onPressed: _start,
               child: const Text("Starta"),
-              onPressed: () {
-                final mapVm = context.read<MapViewModel>();
-
-                mapVm.resetForNewSession();
-
-                context.read<SessionViewModel>().startSession(
-                  courseName: _controller.text,
-                  holesCount: holes,
-                );
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const MapScreen()),
-                );
-              },
             ),
           ],
         ),
