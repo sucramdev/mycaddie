@@ -1,8 +1,80 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/course.dart'; // <-- se till att denna finns
 import '../viewmodels/map_viewmodel.dart';
 import '../viewmodels/session_viewmodel.dart';
 import 'map_screen.dart';
+
+
+final kCourses = <Course>[
+  Course(
+    name: "Bro Hof Slott GC",
+    courseRating: 74.2,
+    slopeRating: 137,
+    holePars: [
+      4,5,3,4,4,5,3,4,4,
+      4,5,3,4,4,5,3,4,4,
+    ],
+    holeHcpIndex: [
+      9,1,17,11,7,3,15,13,5,
+      10,2,18,12,6,4,16,8,14,
+    ],
+  ),
+
+  Course(
+    name: "Bromma 9-hålsbanan",
+    courseRating: 57.9,
+    slopeRating: 97,
+    holePars: [
+      3,3,3,3,3,4,3,3,4,
+    ],
+    holeHcpIndex: [
+      7,3,4,6,8,5,2,9,1,
+    ],
+  ),
+
+  Course(
+    name: "Drottningholm GK",
+    courseRating: 71.6,
+    slopeRating: 129,
+    holePars: [
+      4,4,3,5,4,4,3,5,4,
+      4,5,3,4,4,5,3,4,4,
+    ],
+    holeHcpIndex: [
+      11,3,17,1,9,7,15,5,13,
+      12,2,18,10,6,4,16,8,14,
+    ],
+  ),
+
+  Course(
+    name: "Lindö Dal",
+    courseRating: 69.2,
+    slopeRating: 124,
+    holePars: [
+      4,3,4,3,4,5,4,4,5,
+      4,3,4,4,3,4,4,3,5,
+    ],
+    holeHcpIndex: [
+      11,13,3,7,1,5,15,17,9,
+      10,6,4,16,8,14,2,18,12,
+    ],
+  ),
+
+  Course(
+    name: "Riksten",
+    courseRating: 70.2,
+    slopeRating: 125,
+    holePars: [
+      5,4,3,4,5,4,4,3,4,
+      4,4,5,3,4,5,3,4,4,
+    ],
+    holeHcpIndex: [
+      7,9,17,3,1,13,5,15,11,
+      12,2,6,18,14,4,16,8,10,
+    ],
+  ),
+];
 
 class StartSessionScreen extends StatefulWidget {
   const StartSessionScreen({super.key});
@@ -12,55 +84,22 @@ class StartSessionScreen extends StatefulWidget {
 }
 
 class _StartSessionScreenState extends State<StartSessionScreen> {
-  final _courseNameController = TextEditingController();
-
-  // NEW: controllers for course data
-  final _courseParController = TextEditingController(text: "72");
-  final _courseRatingController = TextEditingController(text: "72.0");
-  final _slopeRatingController = TextEditingController(text: "113");
-
-  int holes = 18;
+  Course? _selectedCourse;
 
   @override
-  void dispose() {
-    _courseNameController.dispose();
-    _courseParController.dispose();
-    _courseRatingController.dispose();
-    _slopeRatingController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    // Defaultval (valfritt)
+    if (kCourses.isNotEmpty) {
+      _selectedCourse = kCourses.first;
+    }
   }
 
   void _start() {
-    final courseName = _courseNameController.text.trim();
-
-    final coursePar = int.tryParse(_courseParController.text.trim());
-    final courseRating = double.tryParse(
-      _courseRatingController.text.trim().replaceAll(',', '.'),
-    );
-    final slopeRating = int.tryParse(_slopeRatingController.text.trim());
-
-    // Basic validation
-    if (courseName.isEmpty) {
+    final course = _selectedCourse;
+    if (course == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Ange golfbana.")),
-      );
-      return;
-    }
-    if (coursePar == null || coursePar <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Ange giltigt banpar (t.ex. 72).")),
-      );
-      return;
-    }
-    if (courseRating == null || courseRating <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Ange giltig course rating (t.ex. 72.0).")),
-      );
-      return;
-    }
-    if (slopeRating == null || slopeRating <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Ange giltig slope rating (t.ex. 113).")),
+        const SnackBar(content: Text("Välj en golfbana.")),
       );
       return;
     }
@@ -68,13 +107,9 @@ class _StartSessionScreenState extends State<StartSessionScreen> {
     final mapVm = context.read<MapViewModel>();
     mapVm.resetForNewSession();
 
-    context.read<SessionViewModel>().startSession(
-      courseName: courseName,
-      holesCount: holes,
-      coursePar: coursePar,
-      courseRating: courseRating,
-      slopeRating: slopeRating,
-    );
+    // OBS: Detta kräver att din SessionViewModel.startSession tar emot Course.
+    // Dvs: startSession({ required Course course })
+    context.read<SessionViewModel>().startSession(course: course);
 
     Navigator.pushReplacement(
       context,
@@ -84,67 +119,47 @@ class _StartSessionScreenState extends State<StartSessionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final course = _selectedCourse;
+
     return Scaffold(
       appBar: AppBar(title: const Text("Ny session")),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: ListView(
           children: [
-            TextField(
-              controller: _courseNameController,
-              decoration: const InputDecoration(labelText: "Golfbana"),
+            DropdownButtonFormField<Course>(
+              value: course,
+              decoration: const InputDecoration(
+                labelText: "Välj golfbana",
+                border: OutlineInputBorder(),
+              ),
+              items: kCourses
+                  .map(
+                    (c) => DropdownMenuItem<Course>(
+                  value: c,
+                  child: Text(c.name),
+                ),
+              )
+                  .toList(),
+              onChanged: (c) => setState(() => _selectedCourse = c),
             ),
             const SizedBox(height: 12),
 
-            DropdownButtonFormField<int>(
-              value: holes,
-              decoration: const InputDecoration(labelText: "Antal hål"),
-              items: const [
-                DropdownMenuItem(value: 9, child: Text("9 hål")),
-                DropdownMenuItem(value: 18, child: Text("18 hål")),
-              ],
-              onChanged: (v) => setState(() => holes = v ?? 18),
-            ),
-            const SizedBox(height: 16),
-
-            const Text(
-              "Bana",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-
-            TextField(
-              controller: _courseParController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: "Banans par",
-                hintText: "t.ex. 72",
-                border: OutlineInputBorder(),
+            // Visar vald ban-data (read-only), så användaren slipper skriva in
+            if (course != null) ...[
+              Card(
+                child: ListTile(
+                  title: const Text("Baninfo"),
+                  subtitle: Text(
+                    "Par: ${course.coursePar}\n"
+                        "Course rating: ${course.courseRating}\n"
+                        "Slope: ${course.slopeRating}\n"
+                        "Hål: ${course.holePars.length}",
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-
-            TextField(
-              controller: _courseRatingController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(
-                labelText: "Course rating",
-                hintText: "t.ex. 72.0",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            TextField(
-              controller: _slopeRatingController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: "Slope rating",
-                hintText: "t.ex. 113",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
+              const SizedBox(height: 12),
+            ],
 
             ElevatedButton(
               onPressed: _start,

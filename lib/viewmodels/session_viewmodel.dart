@@ -11,24 +11,18 @@ class SessionViewModel extends ChangeNotifier {
   List<Session> get history => _history;
 
   void startSession({
-    required String courseName,
-    required int holesCount,
-    required int coursePar,
-    required double courseRating,
-    required int slopeRating,
+    required Course course
   }) {
-    final holes = List.generate(
-      holesCount,
-          (i) => Hole(number: i + 1, par: [3, 4, 5][i % 3]),
-    );
+    final holes = List.generate(course.holePars.length, (i) {
+      return Hole(
+        number: i + 1,
+        par: course.holePars[i],
+        hcpIndex: course.holeHcpIndex[i],
+      );
+    });
 
     _currentSession = Session(
-      course: Course(
-        name: courseName,
-        coursePar: coursePar,
-        courseRating: courseRating,
-        slopeRating: slopeRating,
-      ),
+      course: course,
       holes: holes,
     );
 
