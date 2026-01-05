@@ -8,9 +8,11 @@ class SettingsViewModel extends ChangeNotifier {
   static const _kUseMeters = 'useMeters';
   static const _kClubsJson = 'clubsJson';
   static const _kClubsStats = 'clubsStats';
+  static const _kHandicap = 'handicap';
 
   bool showWind = true;
   bool useMeters = true;
+  double handicap = 36.0;
 
   List<Club> clubs = [
     Club("SW", 90),
@@ -34,6 +36,7 @@ class SettingsViewModel extends ChangeNotifier {
 
     showWind = prefs.getBool(_kShowWind) ?? showWind;
     useMeters = prefs.getBool(_kUseMeters) ?? useMeters;
+    handicap = prefs.getDouble(_kHandicap) ?? handicap;
 
     final clubsJson = prefs.getString(_kClubsJson);
     if (clubsJson != null) {
@@ -56,6 +59,7 @@ class SettingsViewModel extends ChangeNotifier {
 
     await prefs.setBool(_kShowWind, showWind);
     await prefs.setBool(_kUseMeters, useMeters);
+    await prefs.setDouble(_kHandicap, handicap);
 
     final encoded = jsonEncode(
       clubs
@@ -112,6 +116,14 @@ class SettingsViewModel extends ChangeNotifier {
     await _save();
   }
 
+  Future<void> setHandicap(double value) async {
+    if (value.isNaN || value.isInfinite) return;
+    if (value < -10 || value > 54) return; // rimliga golfgränser
+
+    handicap = value;
+    notifyListeners();
+    await _save();
+  }
 
   Future<void> resetToDefaults() async {
     showWind = true;

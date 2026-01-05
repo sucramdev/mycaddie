@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../viewmodels/map_viewmodel.dart';
 import '../viewmodels/session_viewmodel.dart';
 import 'map_screen.dart';
 
@@ -37,6 +38,10 @@ class _StartSessionScreenState extends State<StartSessionScreen> {
             ElevatedButton(
               child: const Text("Starta"),
               onPressed: () {
+                final mapVm = context.read<MapViewModel>();
+
+                mapVm.resetForNewSession();
+
                 context.read<SessionViewModel>().startSession(
                   courseName: _controller.text,
                   holesCount: holes,

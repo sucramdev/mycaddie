@@ -102,6 +102,16 @@ class MapViewModel extends ChangeNotifier {
     });
   }
 
+  void resetForNewSession() {
+    resetStates();
+    resetMarkers();
+
+    lastShotDistance = null;
+
+    notifyListeners();
+  }
+
+
   void resetStates() {
     currentPositionState = CurrentPositionState.WAITING_FOR_CURRENT_POSITION;
     nextShotState = NextShotState.BEFORE_SET;
