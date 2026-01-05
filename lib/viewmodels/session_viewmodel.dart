@@ -29,8 +29,20 @@ class SessionViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void registerScore(int strokes) {
-    _currentSession!.currentScore.strokes = strokes;
+  void registerScore(int strokes, double playerHcp) {
+    final session = _currentSession;
+    if (session == null) return;
+
+    final hole = session.currentHole;
+    final score = session.currentScore;
+
+    final extra = session.strokesReceivedOnHole(playerHcp, hole.number);
+    final netPar = hole.par + extra;
+
+    final points = (2 + (netPar - strokes));
+    score.strokes = strokes;
+    score.points = points < 0 ? 0 : points;
+
     notifyListeners();
   }
 
