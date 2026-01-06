@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../viewmodels/session_viewmodel.dart';
-
+/*
 class ScorecardScreen extends StatelessWidget {
   const ScorecardScreen({super.key});
 
@@ -24,3 +24,5 @@ class ScorecardScreen extends StatelessWidget {
     );
   }
 }
+
+ */

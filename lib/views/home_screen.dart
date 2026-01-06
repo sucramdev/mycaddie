@@ -4,6 +4,7 @@ import '../viewmodels/session_viewmodel.dart';
 import 'start_session_screen.dart';
 import 'settings_screen.dart';
 import 'map_screen.dart';
+import 'history_screen.dart'; // 👈 se till att denna finns
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -24,7 +25,7 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
 
-          /// 🌑 MÖRK OVERLAY (lätt, inte grumlig)
+          /// 🌑 MÖRK OVERLAY
           Positioned.fill(
             child: Container(
               color: Colors.black.withOpacity(0.35),
@@ -62,7 +63,7 @@ class HomeScreen extends StatelessWidget {
 
                 const Spacer(),
 
-                /// 🎯 KNAPPAR (MITTEN)
+                /// 🎯 KNAPPAR
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
@@ -97,6 +98,20 @@ class HomeScreen extends StatelessWidget {
                       const SizedBox(height: 12),
 
                       _PrimaryButton(
+                        text: "Tidigare rundor",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const HistoryScreen(),
+                            ),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      _PrimaryButton(
                         text: "Inställningar",
                         onTap: () {
                           Navigator.push(
@@ -112,57 +127,7 @@ class HomeScreen extends StatelessWidget {
                 ),
 
                 const Spacer(),
-
-                /// 📊 TIDIGARE RUNDOR (NEDERDEL)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.35),
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(24),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Tidigare rundor",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-
-                      if (sessionVM.history.isEmpty)
-                        const Text(
-                          "Inga rundor ännu.",
-                          style: TextStyle(color: Colors.white70),
-                        )
-                      else
-                        ...sessionVM.history.take(3).map((s) {
-                          return Card(
-                            color: Colors.white.withOpacity(0.9),
-                            child: ListTile(
-                              title: Text(s.course.name),
-                              subtitle: Text(
-                                "${s.holes.length} hål • "
-                                    "${s.startedAt.toLocal().toString().substring(0, 16)}",
-                              ),
-                              trailing: Text(
-                                "${s.totalStrokes}",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          );
-                        }),
-                    ],
-                  ),
-                ),
+                const SizedBox(height: 40),
               ],
             ),
           ),
@@ -172,7 +137,7 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-/// 🔘 GEMENSAM SNYGG KNAPP (centrerad text)
+/// 🔘 GEMENSAM SNYGG KNAPP
 class _PrimaryButton extends StatelessWidget {
   final String text;
   final VoidCallback onTap;
@@ -197,15 +162,13 @@ class _PrimaryButton extends StatelessWidget {
           ),
           elevation: 2,
         ),
-        child: Center(
-          child: Text(
-            text,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.2,
-            ),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.2,
           ),
         ),
       ),
