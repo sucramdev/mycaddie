@@ -128,7 +128,7 @@ class _StartSessionScreenState extends State<StartSessionScreen> {
           /// BAKGRUNDSBILD
           Positioned.fill(
             child: Image.asset(
-              'assets/images/golfbild.jpg',
+              'assets/images/golfbild4.jpg',
               fit: BoxFit.cover,
             ),
           ),

@@ -14,135 +14,200 @@ class HomeScreen extends StatelessWidget {
     final currentSession = sessionVM.currentSession;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("myCaddie"),
-        backgroundColor: Colors.black.withOpacity(0.6),
-      ),
       body: Stack(
         children: [
-          /// BAKGRUNDSBILD
+          /// 🌄 BAKGRUNDSBILD
           Positioned.fill(
             child: Image.asset(
-              'assets/images/golfbild2.png',
+              'assets/images/golfbild3.jpg',
               fit: BoxFit.cover,
             ),
           ),
 
-          /// MÖRK OVERLAY FÖR LÄSBARHET
+          /// 🌑 MÖRK OVERLAY (lätt, inte grumlig)
           Positioned.fill(
             child: Container(
-              color: Colors.black.withOpacity(0.45),
+              color: Colors.black.withOpacity(0.35),
             ),
           ),
 
-          /// INNEHÅLL
-          ListView(
-            padding: const EdgeInsets.all(16),
-            children: [
-              if (currentSession != null) ...[
-                Card(
-                  color: Colors.white.withOpacity(0.9),
-                  child: ListTile(
-                    leading: const Icon(Icons.play_arrow),
-                    title: const Text("Fortsätt session"),
-                    subtitle: Text(
-                      "${currentSession.course.name} • "
-                          "Hål ${currentSession.currentHole.number}",
+          /// 📄 INNEHÅLL
+          SafeArea(
+            child: Column(
+              children: [
+                const SizedBox(height: 40),
+
+                /// 🏌️ APP-TITEL
+                Column(
+                  children: const [
+                    Text(
+                      "myCaddie",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 36,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
                     ),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const MapScreen(),
+                    SizedBox(height: 6),
+                    Text(
+                      "Din personliga golfcaddie",
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const Spacer(),
+
+                /// 🎯 KNAPPAR (MITTEN)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
+                    children: [
+                      if (currentSession != null) ...[
+                        _PrimaryButton(
+                          text: "Fortsätt session",
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const MapScreen(),
+                              ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 12),
-              ],
+                        const SizedBox(height: 12),
+                      ],
 
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const StartSessionScreen(),
-                    ),
-                  );
-                },
-                child: const Text("Starta ny session"),
-              ),
-
-              const SizedBox(height: 24),
-
-              const Text(
-                "Tidigare rundor",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              if (sessionVM.history.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.all(12),
-                  child: Text(
-                    "Inga rundor ännu.",
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                )
-              else
-                ...sessionVM.history.map((s) {
-                  return Card(
-                    color: Colors.white.withOpacity(0.9),
-                    child: ListTile(
-                      leading: const Icon(Icons.golf_course),
-                      title: Text(s.course.name),
-                      subtitle: Text(
-                        "${s.holes.length} hål • "
-                            "${s.startedAt.toLocal().toString().substring(0, 16)}",
-                      ),
-                      trailing: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "${s.totalStrokes}",
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                      _PrimaryButton(
+                        text: "Starta ny session",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const StartSessionScreen(),
                             ),
-                          ),
-                          const Text(
-                            "slag",
-                            style: TextStyle(fontSize: 12),
-                          ),
-                        ],
+                          );
+                        },
                       ),
-                    ),
-                  );
-                }),
 
-              const SizedBox(height: 24),
+                      const SizedBox(height: 12),
 
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const SettingsScreen(),
+                      _PrimaryButton(
+                        text: "Inställningar",
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const SettingsScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+
+                const Spacer(),
+
+                /// 📊 TIDIGARE RUNDOR (NEDERDEL)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.35),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(24),
                     ),
-                  );
-                },
-                child: const Text("Inställningar"),
-              ),
-            ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Tidigare rundor",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+
+                      if (sessionVM.history.isEmpty)
+                        const Text(
+                          "Inga rundor ännu.",
+                          style: TextStyle(color: Colors.white70),
+                        )
+                      else
+                        ...sessionVM.history.take(3).map((s) {
+                          return Card(
+                            color: Colors.white.withOpacity(0.9),
+                            child: ListTile(
+                              title: Text(s.course.name),
+                              subtitle: Text(
+                                "${s.holes.length} hål • "
+                                    "${s.startedAt.toLocal().toString().substring(0, 16)}",
+                              ),
+                              trailing: Text(
+                                "${s.totalStrokes}",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 🔘 GEMENSAM SNYGG KNAPP (centrerad text)
+class _PrimaryButton extends StatelessWidget {
+  final String text;
+  final VoidCallback onTap;
+
+  const _PrimaryButton({
+    required this.text,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white.withOpacity(0.9),
+          foregroundColor: Colors.black,
+          padding: const EdgeInsets.symmetric(vertical: 18),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22),
+          ),
+          elevation: 2,
+        ),
+        child: Center(
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.2,
+            ),
+          ),
+        ),
       ),
     );
   }
