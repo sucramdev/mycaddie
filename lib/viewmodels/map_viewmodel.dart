@@ -283,19 +283,6 @@ class MapViewModel extends ChangeNotifier {
     return bearingDeg;
   }
 
-  //15 grader ska vi slå, dvs lite till höger
-
-  // 92-15= 77 5m/s
-
-
-
-  //92 grader (dvs vind kommer från ost och går mot väst)
-  //4.9 m/s
-
-  //
-
-
-
   double _degToRad(double deg) => deg * (math.pi / 180.0);
   double _radToDeg(double rad) => rad * (180.0 / math.pi);
 
@@ -307,15 +294,10 @@ class MapViewModel extends ChangeNotifier {
 
   Weather? weather;
 
-
   void updateWeather(Weather newWeather) {
     weather = newWeather;
     notifyListeners();
   }
-
-
-
-
 
   String get windRecommendation {
     if (weather == null || position == null || nextShot == null) {
@@ -366,7 +348,6 @@ class MapViewModel extends ChangeNotifier {
     }
   }
 
-
   double get windToDirection {
     if (weather == null) return 0;
     return (weather!.windDirection + 180) % 360;
@@ -386,8 +367,6 @@ class MapViewModel extends ChangeNotifier {
   Club get recommendedClub {
     final list = clubs;
     if (list.isEmpty) {
-      // Om du vill: kasta exception eller returnera en default.
-      // Här väljer vi en defensiv fallback.
       return Club("N/A", 0);
     }
 
