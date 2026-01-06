@@ -170,11 +170,31 @@ class _MapScreenState extends State<MapScreen> {
                         Consumer<WeatherViewModel>(
                           builder: (_, wvm, __) {
                             final w = wvm.weather;
-                            return _infoRow(
-                              Icons.air,
-                              w == null
-                                  ? "Hämtar väder…"
-                                  : "${w.temperature}°C • ${w.windSpeed} m/s",
+
+                            if (w != null) {
+                              context.read<MapViewModel>().updateWeather(w);
+                            }
+
+                            if (w == null) {
+                              return _infoRow(Icons.air, "Hämtar väder…");
+                            }
+
+                            final windTo = mapVm.windToDirection;
+                            final arrow = mapVm.arrowFromBearing(windTo);
+
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _infoRow(
+                                  Icons.air,
+                                  "Vind: $arrow ${w.windSpeed.toStringAsFixed(1)} m/s",
+                                ),
+                                const SizedBox(height: 4),
+                                _infoRow(
+                                  Icons.info_outline,
+                                  mapVm.windRecommendation,
+                                ),
+                              ],
                             );
                           },
                         ),
@@ -248,8 +268,8 @@ class _MapScreenState extends State<MapScreen> {
                       ),
                     );
 
-                    mapVm.resetStates();
-                    mapVm.resetMarkers();
+                    //mapVm.resetStates();
+                    //mapVm.resetMarkers();
 
                     setState(() {
                       _infoOffset = null;
