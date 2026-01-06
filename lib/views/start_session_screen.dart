@@ -123,50 +123,74 @@ class _StartSessionScreenState extends State<StartSessionScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text("Ny session")),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: ListView(
-          children: [
-            DropdownButtonFormField<Course>(
-              value: course,
-              decoration: const InputDecoration(
-                labelText: "Välj golfbana",
-                border: OutlineInputBorder(),
-              ),
-              items: kCourses
-                  .map(
-                    (c) => DropdownMenuItem<Course>(
-                  value: c,
-                  child: Text(c.name),
-                ),
-              )
-                  .toList(),
-              onChanged: (c) => setState(() => _selectedCourse = c),
+      body: Stack(
+        children: [
+          /// BAKGRUNDSBILD
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/golfbild4.jpg',
+              fit: BoxFit.cover,
             ),
-            const SizedBox(height: 12),
+          ),
 
-            // Visar vald ban-data (read-only), så användaren slipper skriva in
-            if (course != null) ...[
-              Card(
-                child: ListTile(
-                  title: const Text("Baninfo"),
-                  subtitle: Text(
-                    "Par: ${course.coursePar}\n"
-                        "Course rating: ${course.courseRating}\n"
-                        "Slope: ${course.slopeRating}\n"
-                        "Hål: ${course.holePars.length}",
+          /// MÖRK OVERLAY FÖR LÄSBARHET
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withOpacity(0.45),
+            ),
+          ),
+
+          /// INNEHÅLL
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: ListView(
+                children: [
+                  DropdownButtonFormField<Course>(
+                    value: course,
+                    decoration: const InputDecoration(
+                      labelText: "Välj golfbana",
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.white,
+                    ),
+                    items: kCourses
+                        .map(
+                          (c) => DropdownMenuItem<Course>(
+                        value: c,
+                        child: Text(c.name),
+                      ),
+                    )
+                        .toList(),
+                    onChanged: (c) => setState(() => _selectedCourse = c),
                   ),
-                ),
-              ),
-              const SizedBox(height: 12),
-            ],
+                  const SizedBox(height: 12),
 
-            ElevatedButton(
-              onPressed: _start,
-              child: const Text("Starta"),
+                  if (course != null) ...[
+                    Card(
+                      color: Colors.white,
+                      child: ListTile(
+                        title: const Text("Baninfo"),
+                        subtitle: Text(
+                          "Par: ${course.coursePar}\n"
+                              "Course rating: ${course.courseRating}\n"
+                              "Slope: ${course.slopeRating}\n"
+                              "Hål: ${course.holePars.length}",
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+
+                  ElevatedButton(
+                    onPressed: _start,
+                    child: const Text("Starta"),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

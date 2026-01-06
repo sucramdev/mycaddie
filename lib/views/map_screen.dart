@@ -47,7 +47,7 @@ class _MapScreenState extends State<MapScreen> {
     final sessionVm = context.watch<SessionViewModel>();
     final session = sessionVm.currentSession;
 
-    /// Spawn info-panel automatiskt när något är satt
+    /// Visa info-panel automatiskt
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final shouldShow =
           mapVm.greenState == GreenState.READY ||
@@ -74,7 +74,7 @@ class _MapScreenState extends State<MapScreen> {
       ),
       body: Stack(
         children: [
-          /// KARTA
+          /// 🗺️ KARTA
           GoogleMap(
             mapType: MapType.satellite,
             myLocationEnabled: true,
@@ -113,20 +113,15 @@ class _MapScreenState extends State<MapScreen> {
             },
           ),
 
-          /// INFO-PANEL (flyttbar + tap expand/minimize)
+          /// ℹ️ INFO-PANEL
           if (_infoOffset != null)
             Positioned(
               left: _infoOffset!.dx,
               top: _infoOffset!.dy,
               child: GestureDetector(
-                onTap: () {
-                  setState(() => _infoExpanded = !_infoExpanded);
-                },
-                onPanUpdate: (details) {
-                  setState(() {
-                    _infoOffset = _infoOffset! + details.delta;
-                  });
-                },
+                onTap: () => setState(() => _infoExpanded = !_infoExpanded),
+                onPanUpdate: (d) =>
+                    setState(() => _infoOffset = _infoOffset! + d.delta),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   width: _panelWidth,
@@ -149,7 +144,6 @@ class _MapScreenState extends State<MapScreen> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      /// DRAG-HANDTAG
                       Center(
                         child: Container(
                           width: 42,
@@ -165,79 +159,42 @@ class _MapScreenState extends State<MapScreen> {
                       if (_infoExpanded) ...[
                         if (mapVm.greenState == GreenState.READY)
                           _infoRow(
-                            icon: Icons.flag,
-                            text:
+                            Icons.flag,
                             "${mapVm.distanceToGreen.round()} m till green",
                           ),
-
                         if (mapVm.nextShotState == NextShotState.READY)
                           _infoRow(
-                            icon: Icons.navigation,
-                            text:
+                            Icons.navigation,
                             "${mapVm.distanceToNextShot.round()} m till destination",
                           ),
-
-                        const SizedBox(height: 6),
-
                         Consumer<WeatherViewModel>(
-                          builder: (_, weatherVm, __) {
-                            final w = weatherVm.weather;
-                            if (w == null) {
-                              return _infoRow(
-                                icon: Icons.cloud,
-                                text: "Hämtar väder…",
-                              );
-                            }
+                          builder: (_, wvm, __) {
+                            final w = wvm.weather;
                             return _infoRow(
-                              icon: Icons.air,
-                              text:
-                              "${w.temperature}°C • ${w.windSpeed} m/s",
+                              Icons.air,
+                              w == null
+                                  ? "Hämtar väder…"
+                                  : "${w.temperature}°C • ${w.windSpeed} m/s",
                             );
                           },
                         ),
-
                         if (mapVm.lastShotDistance != null)
                           _infoRow(
-                            icon: Icons.navigation,
-                            text:
+                            Icons.timeline,
                             "Senaste slag: ${mapVm.lastShotDistance!.toStringAsFixed(1)} m",
                           ),
                         const SizedBox(height: 8),
-
                         const Text(
                           "Rekommenderad klubba",
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 12,
-                          ),
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
                         ),
                         Text(
                           mapVm.recommendedClub.name,
                           style: const TextStyle(
                             color: Colors.white,
-                            fontSize: 16,
                             fontWeight: FontWeight.bold,
+                            fontSize: 16,
                           ),
-                        ),
-                      ] else ...[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.golf_course,
-                              color: Colors.white,
-                              size: 18,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              mapVm.recommendedClub.name,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
                         ),
                       ],
                     ],
@@ -246,76 +203,61 @@ class _MapScreenState extends State<MapScreen> {
               ),
             ),
 
-          /// SÄTT POSITION
+          /// 🎮 KNAPPKOLUMN – LYFT UPP (täcker ej Google)
           Positioned(
-            bottom: 20,
-            right: 20,
-            child: FloatingActionButton.extended(
-              icon: const Icon(Icons.my_location),
-              label: Text(
-                mapVm.currentPositionState ==
-                    CurrentPositionState.WAITING_FOR_CURRENT_POSITION
-                    ? "Sätt position"
-                    : "Ändra position",
-              ),
-              onPressed: mapVm.setCurrentPosition,
-            ),
-          ),
+            left: 12,
+            bottom: 30, // 👈 VIKTIGT: lyfter bort från Google-texten
+            child: Column(
+              children: [
+                _MapButton(
+                  icon: Icons.my_location,
+                  text: mapVm.currentPositionState ==
+                      CurrentPositionState.WAITING_FOR_CURRENT_POSITION
+                      ? "Sätt position"
+                      : "Ändra position",
+                  onTap: mapVm.setCurrentPosition,
+                ),
+                const SizedBox(height: 10),
 
-          /// NÄSTA SLAG
-          Positioned(
-            bottom: 80,
-            right: 20,
-            child: FloatingActionButton.extended(
-              icon: const Icon(Icons.flag),
-              label: Text(
-                mapVm.nextShotState == NextShotState.BEFORE_SET
-                    ? "Sätt nästa slag"
-                    : "Ändra slag",
-              ),
-              onPressed: mapVm.resetNextShot,
-            ),
-          ),
+                _MapButton(
+                  icon: Icons.flag,
+                  text: mapVm.nextShotState == NextShotState.BEFORE_SET
+                      ? "Sätt nästa slag"
+                      : "Ändra slag",
+                  onTap: mapVm.resetNextShot,
+                ),
+                const SizedBox(height: 10),
 
-          ///GREEN
-          Positioned(
-            bottom: 140,
-            right: 20,
-            child: FloatingActionButton.extended(
-              icon: const Icon(Icons.golf_course),
-              label: Text(
-                mapVm.greenState == GreenState.BEFORE_SET
-                    ? "Sätt green"
-                    : "Ändra green",
-              ),
-              onPressed: mapVm.resetGreen,
-            ),
-          ),
+                _MapButton(
+                  icon: Icons.golf_course,
+                  text: mapVm.greenState == GreenState.BEFORE_SET
+                      ? "Sätt green"
+                      : "Ändra green",
+                  onTap: mapVm.resetGreen,
+                ),
+                const SizedBox(height: 10),
 
-          /// AVSLUTA HÅL → SCORE
-          Positioned(
-            bottom: 20,
-            left: 20,
-            child: FloatingActionButton.extended(
-              heroTag: "finishHole",
-              icon: const Icon(Icons.check),
-              label: const Text("Avsluta hål"),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const ScoreScreen(),
-                  ),
-                );
+                _MapButton(
+                  icon: Icons.check,
+                  text: "Scorekort",
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ScoreScreen(),
+                      ),
+                    );
 
-                mapVm.resetStates();
-                mapVm.resetMarkers();
+                    mapVm.resetStates();
+                    mapVm.resetMarkers();
 
-                setState(() {
-                  _infoOffset = null;
-                  _infoExpanded = true;
-                });
-              },
+                    setState(() {
+                      _infoOffset = null;
+                      _infoExpanded = true;
+                    });
+                  },
+                ),
+              ],
             ),
           ),
         ],
@@ -323,7 +265,7 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
-  Widget _infoRow({required IconData icon, required String text}) {
+  Widget _infoRow(IconData icon, String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
@@ -331,12 +273,43 @@ class _MapScreenState extends State<MapScreen> {
           Icon(icon, size: 18, color: Colors.white70),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(color: Colors.white),
-            ),
+            child: Text(text, style: const TextStyle(color: Colors.white)),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 🔘 GEMENSAM KNAPP
+class _MapButton extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final VoidCallback onTap;
+
+  const _MapButton({
+    required this.icon,
+    required this.text,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 160,
+      child: ElevatedButton.icon(
+        icon: Icon(icon, size: 18),
+        label: Text(text, textAlign: TextAlign.center),
+        onPressed: onTap,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white.withOpacity(0.95),
+          foregroundColor: Colors.black,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+          elevation: 2,
+        ),
       ),
     );
   }
