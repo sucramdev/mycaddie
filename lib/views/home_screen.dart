@@ -17,7 +17,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          /// 🌄 BAKGRUNDSBILD
+          /// bakgrundsbild
           Positioned.fill(
             child: Image.asset(
               'assets/images/golfbild3.jpg',
@@ -25,20 +25,20 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
 
-          /// 🌑 MÖRK OVERLAY
+          /// mörkare overlay
           Positioned.fill(
             child: Container(
               color: Colors.black.withOpacity(0.35),
             ),
           ),
 
-          /// 📄 INNEHÅLL
+          /// innehåll
           SafeArea(
             child: Column(
               children: [
                 const SizedBox(height: 40),
 
-                /// 🏌️ APP-TITEL
+                /// Appens titel
                 Column(
                   children: const [
                     Text(
@@ -63,7 +63,7 @@ class HomeScreen extends StatelessWidget {
 
                 const Spacer(),
 
-                /// 🎯 KNAPPAR
+                /// Knappar
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
@@ -137,7 +137,7 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-/// 🔘 GEMENSAM SNYGG KNAPP
+/// GEMENSAM KNAPP
 class _PrimaryButton extends StatelessWidget {
   final String text;
   final VoidCallback onTap;

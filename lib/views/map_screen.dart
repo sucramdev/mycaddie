@@ -74,7 +74,7 @@ class _MapScreenState extends State<MapScreen> {
       ),
       body: Stack(
         children: [
-          /// 🗺️ KARTA
+          /// KARTA
           GoogleMap(
             mapType: MapType.satellite,
             myLocationEnabled: true,
@@ -113,7 +113,7 @@ class _MapScreenState extends State<MapScreen> {
             },
           ),
 
-          /// ℹ️ INFO-PANEL
+          /// INFO-PANEL
           if (_infoOffset != null)
             Positioned(
               left: _infoOffset!.dx,
@@ -223,10 +223,10 @@ class _MapScreenState extends State<MapScreen> {
               ),
             ),
 
-          /// 🎮 KNAPPKOLUMN – LYFT UPP (täcker ej Google)
+          /// KNAPPKOLUMN
           Positioned(
             left: 12,
-            bottom: 30, // 👈 VIKTIGT: lyfter bort från Google-texten
+            bottom: 30,
             child: Column(
               children: [
                 _MapButton(
@@ -301,7 +301,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 }
 
-/// 🔘 GEMENSAM KNAPP
+/// GEMENSAM KNAPP
 class _MapButton extends StatelessWidget {
   final IconData icon;
   final String text;

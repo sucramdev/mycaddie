@@ -47,7 +47,7 @@ class HistoryScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                /// ⛳ SCORE
+                /// SCORE
                 Container(
                   width: 54,
                   height: 54,
