@@ -181,7 +181,7 @@ class _MapScreenState extends State<MapScreen> {
 
                             //final windTo = mapVm.windToDirection;
                             final arrow = mapVm.arrowFromBearing(mapVm.windDirection);
-                            final shotDirection = mapVm.arrowFromBearing(mapVm.bearingToNextShot);
+                            final shotDirection = mapVm.arrowShotDirection(mapVm.bearingToNextShot);
 
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -191,6 +191,7 @@ class _MapScreenState extends State<MapScreen> {
                                   "Vind: $arrow ${w.windSpeed.toStringAsFixed(1)} m/s",
                                 ),
                                 const SizedBox(height: 4),
+                                if (mapVm.nextShotState == NextShotState.READY)
                                 _infoRow(
                                   Icons.info_outline,
                                   mapVm.windRecommendation,
@@ -201,10 +202,6 @@ class _MapScreenState extends State<MapScreen> {
                                   "Slag: $shotDirection",
                                 ),
                                 const SizedBox(height: 4),
-                                _infoRow(
-                                  Icons.info_outline,
-                                  mapVm.windRecommendation,
-                                ),
                               ],
                             );
                           },
@@ -215,10 +212,12 @@ class _MapScreenState extends State<MapScreen> {
                             "Senaste slag: ${mapVm.lastShotDistance!.toStringAsFixed(1)} m",
                           ),
                         const SizedBox(height: 8),
+                        if (mapVm.nextShotState == NextShotState.READY)
                         const Text(
                           "Rekommenderad klubba",
                           style: TextStyle(color: Colors.white70, fontSize: 12),
                         ),
+                        if (mapVm.nextShotState == NextShotState.READY)
                         Text(
                           mapVm.recommendedClub.name,
                           style: const TextStyle(
