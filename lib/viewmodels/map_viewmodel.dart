@@ -162,7 +162,6 @@ class MapViewModel extends ChangeNotifier {
     return weather!.windSpeed < 4.5;
   }
 
-
   double get effectiveDistanceToShot {
     if (weather == null || nextShot == null) return distanceToNextShot;
 
@@ -353,6 +352,13 @@ class MapViewModel extends ChangeNotifier {
     return (weather!.windDirection + 180) % 360;
   }
 
+  
+  double get windDirection {
+    if (weather == null) return 0;
+    return weather!.windDirection.roundToDouble();
+  }
+
+  /*
   String arrowFromBearing(double bearing) {
   if (bearing >= 337.5 || bearing < 22.5) return "↑";
   if (bearing < 67.5) return "↗";
@@ -363,6 +369,15 @@ class MapViewModel extends ChangeNotifier {
   if (bearing < 292.5) return "←";
   return "↖";
   }
+   */
+
+  String arrowFromBearing(double bearing) {
+    const dirs = ['↓', '↙', '←', '↖', '↑', '↗', '→', '↘', '↓'];
+    final idx = ((bearing % 360) / 45).round();
+    return dirs[idx];
+  }
+
+
 
   Club get recommendedClub {
     final list = clubs;

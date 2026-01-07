@@ -179,8 +179,9 @@ class _MapScreenState extends State<MapScreen> {
                               return _infoRow(Icons.air, "Hämtar väder…");
                             }
 
-                            final windTo = mapVm.windToDirection;
-                            final arrow = mapVm.arrowFromBearing(windTo);
+                            //final windTo = mapVm.windToDirection;
+                            final arrow = mapVm.arrowFromBearing(mapVm.windDirection);
+                            final shotDirection = mapVm.arrowFromBearing(mapVm.bearingToNextShot);
 
                             return Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,6 +189,16 @@ class _MapScreenState extends State<MapScreen> {
                                 _infoRow(
                                   Icons.air,
                                   "Vind: $arrow ${w.windSpeed.toStringAsFixed(1)} m/s",
+                                ),
+                                const SizedBox(height: 4),
+                                _infoRow(
+                                  Icons.info_outline,
+                                  mapVm.windRecommendation,
+                                ),
+                                if (mapVm.nextShotState == NextShotState.READY)
+                                _infoRow(
+                                  Icons.navigation,
+                                  "Slag: $shotDirection",
                                 ),
                                 const SizedBox(height: 4),
                                 _infoRow(
