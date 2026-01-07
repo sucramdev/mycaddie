@@ -70,7 +70,7 @@ class HomeScreen extends StatelessWidget {
                     children: [
                       if (currentSession != null) ...[
                         _PrimaryButton(
-                          text: "Fortsätt session",
+                          text: "Fortsätt runda",
                           onTap: () {
                             Navigator.push(
                               context,
@@ -84,7 +84,7 @@ class HomeScreen extends StatelessWidget {
                       ],
 
                       _PrimaryButton(
-                        text: "Starta ny session",
+                        text: "Starta ny runda",
                         onTap: () {
                           Navigator.push(
                             context,
