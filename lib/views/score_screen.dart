@@ -21,9 +21,13 @@ class _ScoreScreenState extends State<ScoreScreen> {
     final settings = context.read<SettingsViewModel>();
     final handicap = settings.handicap;
 
-    final session = sessionVM.currentSession!;
+    final session = sessionVM.currentSession;
+    if (session == null) return const SizedBox.shrink();
+
     final currentHole = session.currentHole;
     final isLastHole = session.isFinished;
+
+
 
     return Scaffold(
       appBar: AppBar(title: const Text("Scorekort")),

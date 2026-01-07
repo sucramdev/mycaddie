@@ -1,14 +1,21 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/course.dart';
 import '../models/hole.dart';
 import '../models/session.dart';
+import '../models/session_summary.dart';
 
 class SessionViewModel extends ChangeNotifier {
   Session? _currentSession;
-  final List<Session> _history = [];
+  //final List<Session> _history = [];
+  final List<SessionSummary> _history = [];
+
 
   Session? get currentSession => _currentSession;
-  List<Session> get history => _history;
+  //List<Session> get history => _history;
+  List<SessionSummary> get history => _history;
 
   void startSession({
     required Course course
@@ -59,8 +66,45 @@ class SessionViewModel extends ChangeNotifier {
   }
 
   void finishSession() {
-    _history.add(_currentSession!);
+    final session = _currentSession;
+    if (session == null) return;
+
+    _history.add(
+      SessionSummary(
+        courseName: session.course.name,
+        startedAt: session.startedAt,
+        totalStrokes: session.totalStrokes,
+        holesCount: session.holes.length,
+        totalPoints: session.totalPoints
+      ),
+    );
+
     _currentSession = null;
+    _saveHistory();
     notifyListeners();
+  }
+
+  SessionViewModel() {
+    _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString('session_history');
+    if (raw == null) return;
+
+    final List decoded = jsonDecode(raw);
+    _history
+      ..clear()
+      ..addAll(decoded.map((e) => SessionSummary.fromJson(e)));
+
+    notifyListeners();
+  }
+
+  Future<void> _saveHistory() async {
+    final prefs = await SharedPreferences.getInstance();
+    final encoded =
+    jsonEncode(_history.map((s) => s.toJson()).toList());
+    await prefs.setString('session_history', encoded);
   }
 }

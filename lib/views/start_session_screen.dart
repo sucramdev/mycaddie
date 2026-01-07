@@ -146,23 +146,42 @@ class _StartSessionScreenState extends State<StartSessionScreen> {
               padding: const EdgeInsets.all(20),
               child: ListView(
                 children: [
-                  DropdownButtonFormField<Course>(
-                    value: course,
-                    decoration: const InputDecoration(
-                      labelText: "Välj golfbana",
-                      border: OutlineInputBorder(),
-                      filled: true,
-                      fillColor: Colors.white,
-                    ),
-                    items: kCourses
-                        .map(
-                          (c) => DropdownMenuItem<Course>(
-                        value: c,
-                        child: Text(c.name),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Välj golfbana",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    )
-                        .toList(),
-                    onChanged: (c) => setState(() => _selectedCourse = c),
+                      const SizedBox(height: 8),
+
+                      DropdownButtonFormField<Course>(
+                        value: course,
+                        items: kCourses
+                            .map(
+                              (c) => DropdownMenuItem<Course>(
+                            value: c,
+                            child: Text(c.name),
+                          ),
+                        )
+                            .toList(),
+                        onChanged: (c) => setState(() => _selectedCourse = c),
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.95),
+                          contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
 
