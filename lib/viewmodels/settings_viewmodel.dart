@@ -28,7 +28,6 @@ class SettingsViewModel extends ChangeNotifier {
 
   bool _loaded = false;
 
-  /// Ladda inställningar från telefonen (kalla en gång vid start)
   Future<void> load() async {
     if (_loaded) return;
 

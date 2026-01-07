@@ -9,12 +9,10 @@ import '../models/session_summary.dart';
 
 class SessionViewModel extends ChangeNotifier {
   Session? _currentSession;
-  //final List<Session> _history = [];
   final List<SessionSummary> _history = [];
 
 
   Session? get currentSession => _currentSession;
-  //List<Session> get history => _history;
   List<SessionSummary> get history => _history;
 
   void startSession({
