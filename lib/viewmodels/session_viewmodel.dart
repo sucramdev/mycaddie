@@ -75,6 +75,7 @@ class SessionViewModel extends ChangeNotifier {
         startedAt: session.startedAt,
         totalStrokes: session.totalStrokes,
         holesCount: session.holes.length,
+        totalPoints: session.totalPoints
       ),
     );
 

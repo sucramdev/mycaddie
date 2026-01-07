@@ -68,12 +68,16 @@ class Session {
     return map[holeNumber] ?? 0;
   }
 
-
-
   // Statistik
   int get totalStrokes =>
       scores.fold(0, (sum, s) => sum + s.strokes);
 
   double get averageStrokes =>
       totalStrokes / scores.length;
+
+  int get totalPoints =>
+      scores.fold(0, (sum, s) => sum + s.points);
+
 }
+
+
