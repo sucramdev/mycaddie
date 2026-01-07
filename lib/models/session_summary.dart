@@ -18,6 +18,7 @@ class SessionSummary {
     'startedAt': startedAt.toIso8601String(),
     'totalStrokes': totalStrokes,
     'holesCount': holesCount,
+    'totalPoints': totalPoints,
   };
 
   factory SessionSummary.fromJson(Map<String, dynamic> json) {

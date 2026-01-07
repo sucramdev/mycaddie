@@ -114,12 +114,9 @@ class _ScoreScreenState extends State<ScoreScreen> {
                 sessionVM.registerScore(strokes, handicap);
 
                 if (isLastHole) {
+                  sessionVM.finishSession();
+                  mapVM.calcAvgAndSave();
                   Navigator.popUntil(context, (route) => route.isFirst);
-
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    sessionVM.finishSession();
-                    mapVM.calcAvgAndSave();
-                  });
                 } else {
                   sessionVM.nextHole();
                   mapVM.resetStates();
