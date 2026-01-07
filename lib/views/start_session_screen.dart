@@ -122,7 +122,7 @@ class _StartSessionScreenState extends State<StartSessionScreen> {
     final course = _selectedCourse;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Ny session")),
+      appBar: AppBar(title: const Text("Ny runda")),
       body: Stack(
         children: [
           /// BAKGRUNDSBILD
