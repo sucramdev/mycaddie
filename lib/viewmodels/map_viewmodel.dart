@@ -159,7 +159,7 @@ class MapViewModel extends ChangeNotifier {
 
   bool get shouldTrainShot {
     if (weather == null) return true;
-    return weather!.windSpeed < 4.5;
+    return weather!.windSpeed < 10;
   }
 
   double get effectiveDistanceToShot {
