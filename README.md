@@ -1,16 +1,11 @@
 # mycaddie
 
-A new Flutter project.
+A caddie application for golfers. Code written in Dart using the Flutter framework. 
 
-## Getting Started
+<img width="474" height="1029" alt="image" src="https://github.com/user-attachments/assets/354c6fa4-588c-4d3a-866a-8a7de02dfb48" />
 
-This project is a starting point for a Flutter application.
+<img width="471" height="1012" alt="image" src="https://github.com/user-attachments/assets/919ed799-5724-4fec-bfda-ba7783835af7" />
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+
