@@ -1,4 +1,4 @@
-# mycaddie
+# myCaddie
 
 A caddie application for golfers. Code written in Dart using the Flutter framework. 
 
